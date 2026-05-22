@@ -589,6 +589,113 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
 
+        // Mobile Menu Toggle
+        const mobileNavToggle = document.getElementById('mobile-nav-toggle');
+        const landingNav = document.querySelector('.landing-nav');
+        if (mobileNavToggle && landingNav) {
+            mobileNavToggle.addEventListener('click', () => {
+                landingNav.classList.toggle('mobile-active');
+            });
+            
+            // Close mobile menu when clicking a nav link
+            const navLinks = landingNav.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if (landingNav.classList.contains('mobile-active')) {
+                        landingNav.classList.remove('mobile-active');
+                    }
+                });
+            });
+        }
+
+        // Company Profile Overlay Toggle
+        const navTentangKami = document.getElementById('nav-tentang-kami');
+        const navBeranda = document.getElementById('nav-beranda');
+        const companyProfileSection = document.getElementById('company-profile-section');
+        const landingContent = document.getElementById('landing-content');
+
+        if (navTentangKami && companyProfileSection && landingContent) {
+            navTentangKami.addEventListener('click', (e) => {
+                e.preventDefault();
+                landingContent.style.display = 'none';
+                companyProfileSection.style.display = 'block';
+                
+                // Show about, vision-mission, and core-values
+                const showSections = ['about-profile', 'vision-mission-profile', 'core-values-profile'];
+                showSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'block';
+                });
+
+                const hideSections = ['services-profile', 'clients-profile'];
+                hideSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                
+                window.scrollTo(0, 0);
+            });
+        }
+
+        if (navBeranda && companyProfileSection && landingContent) {
+            navBeranda.addEventListener('click', (e) => {
+                // Only act as a back button if company profile is open
+                if (companyProfileSection.style.display === 'block') {
+                    e.preventDefault();
+                    companyProfileSection.style.display = 'none';
+                    landingContent.style.display = 'block';
+                    window.scrollTo(0, 0);
+                }
+            });
+        }
+
+        const navMitra = document.getElementById('nav-mitra');
+        if (navMitra && companyProfileSection && landingContent) {
+            navMitra.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Switch to company profile view
+                landingContent.style.display = 'none';
+                companyProfileSection.style.display = 'block';
+                
+                // Hide all sections except clients-profile
+                const hideSections = ['about-profile', 'vision-mission-profile', 'services-profile', 'core-values-profile'];
+                hideSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                
+                const clientsSection = document.getElementById('clients-profile');
+                if (clientsSection) {
+                    clientsSection.style.display = 'block';
+                }
+                
+                window.scrollTo(0, 0);
+            });
+        }
+
+        const navLayanan = document.getElementById('nav-layanan');
+        if (navLayanan && companyProfileSection && landingContent) {
+            navLayanan.addEventListener('click', (e) => {
+                e.preventDefault();
+                landingContent.style.display = 'none';
+                companyProfileSection.style.display = 'block';
+                
+                const showSections = ['services-profile', 'core-values-profile'];
+                showSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'block';
+                });
+
+                const hideSections = ['about-profile', 'vision-mission-profile', 'clients-profile'];
+                hideSections.forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.style.display = 'none';
+                });
+                
+                window.scrollTo(0, 0);
+            });
+        }
+
         // Dynamic Interactive Cost Estimator
         const estDayaSelect = document.getElementById('est-daya');
         const estJenisSelect = document.getElementById('est-jenis');
@@ -626,8 +733,43 @@ document.addEventListener('DOMContentLoaded', () => {
         const typeStr = estJenisSelect.value;
         const dayaValue = parseInt(dayaStr.replace(' VA', ''));
 
-        let nidiCost = dayaValue * 100; // Rp 100 per VA
-        let sloCost = dayaValue * 120;  // Rp 120 per VA
+        // Load Master Biaya
+        let biayas = JSON.parse(localStorage.getItem('wh_biaya'));
+        if (!biayas) {
+            biayas = [
+                { daya: 450, nidi: 45000, slo: 40000, area: 23000, mitra: 70000, langganan: 85000, pelanggan: 135000 },
+                { daya: 900, nidi: 90000, slo: 60000, area: 39000, mitra: 130000, langganan: 150000, pelanggan: 200000 },
+                { daya: 1300, nidi: 130000, slo: 120000, area: 68000, mitra: 165000, langganan: 250000, pelanggan: 300000 },
+                { daya: 2200, nidi: 220000, slo: 135000, area: 91250, mitra: 275000, langganan: 355000, pelanggan: 405000 },
+                { daya: 3500, nidi: 350000, slo: 122500, area: 112875, mitra: 400000, langganan: 472500, pelanggan: 522500 },
+                { daya: 4400, nidi: 440000, slo: 154000, area: 141900, mitra: 500000, langganan: 594000, pelanggan: 644000 },
+                { daya: 5500, nidi: 550000, slo: 192500, area: 177375, mitra: 600000, langganan: 742500, pelanggan: 792500 },
+                { daya: 6600, nidi: 660000, slo: 231000, area: 212850, mitra: 750000, langganan: 891000, pelanggan: 991000 },
+                { daya: 7700, nidi: 770000, slo: 269500, area: 248325, mitra: 800000, langganan: 1039500, pelanggan: 1089500 },
+                { daya: 10600, nidi: 1060000, slo: 318000, area: 323300, mitra: 1100000, langganan: 1378000, pelanggan: 1478000 },
+                { daya: 11000, nidi: 1100000, slo: 330000, area: 335500, mitra: 1200000, langganan: 1430000, pelanggan: 1530000 },
+                { daya: 13200, nidi: 1320000, slo: 264000, area: 356400, mitra: 1300000, langganan: 1584000, pelanggan: 1684000 },
+                { daya: 16500, nidi: 1650000, slo: 495000, area: 503250, mitra: 1800000, langganan: 2145000, pelanggan: 2245000 },
+                { daya: 23000, nidi: 1725000, slo: 690000, area: 586500, mitra: 2000000, langganan: 2415000, pelanggan: 2515000 },
+                { daya: 33000, nidi: 2475000, slo: 825000, area: 783750, mitra: 2800000, langganan: 3300000, pelanggan: 3400000 },
+                { daya: 41500, nidi: 3112500, slo: 1037500, area: 985625, mitra: 3500000, langganan: 4150000, pelanggan: 4250000 },
+                { daya: 53000, nidi: 3975000, slo: 1325000, area: 1258750, mitra: 4500000, langganan: 5300000, pelanggan: 5400000 },
+                { daya: 66000, nidi: 4950000, slo: 1650000, area: 1567500, mitra: 5600000, langganan: 6600000, pelanggan: 6800000 },
+                { daya: 82500, nidi: 4950000, slo: 1650000, area: 1567500, mitra: 5600000, langganan: 6600000, pelanggan: 6800000 },
+                { daya: 105000, nidi: 6300000, slo: 2100000, area: 1995000, mitra: 7000000, langganan: 8400000, pelanggan: 8600000 },
+                { daya: 131000, nidi: 7860000, slo: 2620000, area: 2489000, mitra: 8900000, langganan: 10480000, pelanggan: 10680000 },
+                { daya: 147000, nidi: 8820000, slo: 2940000, area: 2793000, mitra: 9800000, langganan: 11760000, pelanggan: 11960000 },
+                { daya: 164000, nidi: 9840000, slo: 3280000, area: 3116000, mitra: 11000000, langganan: 13120000, pelanggan: 13320000 },
+                { daya: 197000, nidi: 11820000, slo: 3940000, area: 3743000, mitra: 13000000, langganan: 15760000, pelanggan: 15960000 }
+            ];
+            localStorage.setItem('wh_biaya', JSON.stringify(biayas));
+        }
+
+        const bItem = biayas.find(b => b.daya === dayaValue) || { nidi: 0, slo: 0, pelanggan: 0 };
+        
+        let nidiCost = bItem.nidi;
+        let sloCost = bItem.slo;
+        let pelangganCost = bItem.pelanggan;
 
         let totalCost = 0;
         let detailsText = '';
@@ -639,11 +781,11 @@ document.addEventListener('DOMContentLoaded', () => {
             totalCost = sloCost;
             detailsText = `Biaya SLO untuk daya ${dayaStr} sebesar Rp ${formatCurrency(sloCost)}. Meliputi inspeksi keselamatan instalasi & sertifikasi.`;
         } else if (typeStr === 'SLO + NIDI') {
-            totalCost = Math.round((nidiCost + sloCost) * 0.9); // 10% discount
-            detailsText = `Biaya Paket NIDI + SLO (Hemat 10%):<br>NIDI: Rp ${formatCurrency(nidiCost)}<br>SLO: Rp ${formatCurrency(sloCost)}<br>Total Asli: Rp ${formatCurrency(nidiCost+sloCost)} -> Diskon Paket: Rp ${formatCurrency(totalCost)}`;
+            totalCost = nidiCost + sloCost;
+            detailsText = `Biaya Paket NIDI + SLO Resmi (Status Pelanggan):<br>NIDI: Rp ${formatCurrency(nidiCost)}<br>SLO: Rp ${formatCurrency(sloCost)}<br>Total Harga Resmi: Rp ${formatCurrency(totalCost)}`;
         } else if (typeStr === 'FULL') {
-            totalCost = Math.round((nidiCost + sloCost) * 1.25); // Includes extra setup fee
-            detailsText = `Biaya Full Service (NIDI, SLO & Pekerjaan Sipil/Instalasi Lapangan):<br>Jasa NIDI + SLO + Material Pendukung & Jasa Tenaga Ahli Terintegrasi. Estimasi Rp ${formatCurrency(totalCost)}.`;
+            totalCost = pelangganCost;
+            detailsText = `Biaya Full Service (NIDI, SLO & Pekerjaan Sipil/Instalasi Lapangan):<br>Sesuai dengan Tarif Resmi Kategori PELANGGAN. Estimasi Total Rp ${formatCurrency(totalCost)}.`;
         }
 
         estPriceSpan.textContent = `Rp ${formatCurrency(totalCost)}`;
@@ -4738,5 +4880,23 @@ document.addEventListener('DOMContentLoaded', () => {
             case 'Completed': return 'badge-completed';
             default: return '';
         }
+    }
+
+    // Global Mobile Sidebar Toggle
+    const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
+    const portalSidebar = document.querySelector('.portal-sidebar');
+    if (mobileSidebarToggle && portalSidebar) {
+        mobileSidebarToggle.addEventListener('click', () => {
+            portalSidebar.classList.toggle('mobile-open');
+        });
+        
+        // Close sidebar when clicking outside on mobile
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth <= 576 && portalSidebar.classList.contains('mobile-open')) {
+                if (!portalSidebar.contains(e.target) && !mobileSidebarToggle.contains(e.target)) {
+                    portalSidebar.classList.remove('mobile-open');
+                }
+            }
+        });
     }
 });

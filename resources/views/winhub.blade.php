@@ -39,21 +39,24 @@
                 </div>
             </div>
             <ul class="nav-links">
-                <li><a href="#" class="nav-link active">Beranda</a></li>
-                <li class="dropdown-link">
-                    <a href="#" class="nav-link">Layanan <i class="fas fa-chevron-down" style="font-size:10px;"></i></a>
+                <li><a href="#" class="nav-link active" id="nav-beranda">Beranda</a></li>
+                <li>
+                    <a href="#" class="nav-link" id="nav-layanan">Layanan</a>
                 </li>
-                <li><a href="#" class="nav-link">Mitra</a></li>
+                <li><a href="#" class="nav-link" id="nav-mitra">Mitra</a></li>
                 <li><a href="#" class="nav-link btn-lacak-trigger">Lacak Pesanan</a></li>
-                <li><a href="#" class="nav-link">Artikel</a></li>
-                <li><a href="#" class="nav-link">Tentang Kami</a></li>
-                <li><a href="#" class="nav-link">Kontak</a></li>
+                <li><a href="#" class="nav-link" id="nav-tentang-kami">Tentang Kami</a></li>
             </ul>
-            <button class="btn-portal-access" id="btn-nav-login"><i class="fas fa-user-circle" style="font-size: 16px;"></i> Login</button>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button class="btn-portal-access" id="btn-nav-login"><i class="fas fa-user-circle" style="font-size: 16px;"></i> <span class="hide-mobile">Login</span></button>
+                <button id="mobile-nav-toggle" class="mobile-menu-btn" style="display:none; background:none; border:none; font-size:24px; color:var(--primary); cursor:pointer;"><i class="fas fa-bars"></i></button>
+            </div>
         </nav>
 
-        <!-- Hero Section -->
-        <section class="hero-section">
+        <!-- Landing Content -->
+        <div id="landing-content">
+            <!-- Hero Section -->
+            <section class="hero-section">
             <div class="hero-text">
                 <h1>Solusi Layanan Kelistrikan <span class="highlight-blue">Cerdas</span> dan <span class="highlight-orange">Terintegrasi</span></h1>
                 <p>WIN Hub membantu pelanggan mengurus berbagai layanan kelistrikan dengan mudah, cepat, transparan, dan terintegrasi dalam satu platform.</p>
@@ -183,8 +186,8 @@
                             <select id="est-jenis" class="calc-select" style="background: white; color: #333; border: 1px solid #ccc; padding: 10px 15px; border-radius: 6px;">
                                 <option value="NIDI">NIDI SAJA</option>
                                 <option value="SLO">SLO SAJA</option>
-                                <option value="SLO + NIDI">SLO + NIDI (Paket Hemat 10%)</option>
-                                <option value="FULL">FULL SERVICE (Pekerjaan Lapangan & Sertifikasi)</option>
+                                <option value="SLO + NIDI">SLO + NIDI</option>
+                                <option value="FULL">FULL SERVICE</option>
                             </select>
                         </div>
                     </div>
@@ -211,12 +214,220 @@
             </div>
         </section>
 
-        <!-- Footer -->
-        <footer class="landing-footer-new">
-            <div class="footer-bottom-new">
-                &copy; 2026 WIN Hub - Smart Electrical Service Platform. All rights reserved.
+        <!-- Footer / Contact Us -->
+        <footer id="kontak" class="landing-footer-new" style="background: #0B1E43; color: white; padding: 60px 8% 20px 8%;">
+            <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-bottom: 40px;">
+                <div>
+                    <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 20px; color: white;">PT Winata Solusindo Group</h3>
+                    <p style="color: #94A3B8; line-height: 1.6; margin-bottom: 10px;">
+                        <i class="fas fa-map-marker-alt" style="margin-right: 10px; color: var(--secondary);"></i>
+                        <strong>Alamat:</strong> Jl. Kenanga 2 RT 7 Kel. Batu Urip, Kec. Lubuklinggau Utara II Kota Lubuklinggau
+                    </p>
+                    <p style="color: #94A3B8; line-height: 1.6; margin-bottom: 10px;">
+                        <i class="fas fa-building" style="margin-right: 10px; color: var(--secondary);"></i>
+                        <strong>Kantor Pelayanan:</strong> Jl Pinangsia (Depan UP3 Lubuklinggau) Kota Lubuklinggau
+                    </p>
+                </div>
+                <div>
+                    <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 20px; color: white;">Hubungi Kami</h3>
+                    <p style="color: #94A3B8; line-height: 1.6; margin-bottom: 10px;">
+                        <i class="fas fa-phone-alt" style="margin-right: 10px; color: var(--secondary);"></i>
+                        0813 828255 / 081356565667
+                    </p>
+                    <p style="color: #94A3B8; line-height: 1.6; margin-bottom: 10px;">
+                        <i class="fas fa-envelope" style="margin-right: 10px; color: var(--secondary);"></i>
+                        pt.winatasolusindogroup@gmail.com
+                    </p>
+                    <p style="color: #94A3B8; line-height: 1.6;">
+                        <i class="fas fa-globe" style="margin-right: 10px; color: var(--secondary);"></i>
+                        <a href="https://wingroup.id" style="color: #94A3B8; text-decoration: none;">wingroup.id</a>
+                    </p>
+                </div>
+            </div>
+            <div class="footer-bottom-new" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; color: #64748B; font-size: 14px;">
+                &copy; 2026 PT Winata Solusindo Group - WIN Hub. All rights reserved.
             </div>
         </footer>
+        </div> <!-- End of landing-content -->
+
+        <!-- ============================================ -->
+        <!-- 5. COMPANY PROFILE OVERLAY                   -->
+        <!-- ============================================ -->
+        <div id="company-profile-section" style="display: none; background: #f8fafc; min-height: 100vh;">
+            <div style="padding-bottom: 0;">
+                <!-- About Us Section -->
+                <section id="about-profile" class="about-section" style="padding: 120px 8% 60px 8%; background: #fff;">
+                    <div style="max-width: 1200px; margin: 0 auto; text-align: center;">
+                        <span class="section-tag-red">TENTANG KAMI</span>
+                        <h2 class="section-title-new" style="margin-bottom: 20px;">PT Winata Solusindo Group</h2>
+                        <p style="font-size: 16px; color: #4A5568; line-height: 1.8; margin-bottom: 20px; text-align: justify;">
+                            PT Winata Solusindo Group adalah perusahaan yang bergerak di bidang elektrikal, civil konstruksi, dan pengadaan, hadir sebagai mitra strategis dalam mewujudkan pembangunan infrastruktur yang modern, aman, dan berkelanjutan. Dengan dukungan tim profesional berpengalaman, teknologi terkini, serta komitmen terhadap kualitas, kami menghadirkan solusi menyeluruh mulai dari perencanaan, pelaksanaan proyek, hingga penyediaan material yang tepat waktu dan efisien.
+                        </p>
+                        <p style="font-size: 15px; color: #64748B; font-style: italic; text-align: justify; padding-left: 20px; border-left: 4px solid var(--primary);">
+                            PT Winata Solusindo Group is a company specializing in electrical, civil construction, and procurement services, serving as a strategic partner in delivering modern, safe, and sustainable infrastructure development. With the support of experienced professionals, the latest technology, and a strong commitment to quality, we provide end-to-end solutions from planning and project execution to timely and efficient procurement.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Vision & Mission Section -->
+                <section id="vision-mission-profile" class="vision-mission-section" style="padding: 60px 8%; background: #F8FAFC;">
+                    <div style="max-width: 1200px; margin: 0 auto;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px;">
+                            <!-- Visi -->
+                            <div style="background: white; border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border-top: 4px solid var(--primary);">
+                                <h3 style="font-size: 24px; color: var(--primary); margin-bottom: 20px; font-weight: 800;"><i class="fas fa-eye"></i> Visi (Vision)</h3>
+                                <p style="color: #4A5568; line-height: 1.7; margin-bottom: 15px; text-align: justify;">Menjadi perusahaan terdepan di bidang elektrikal, konstruksi sipil, dan pengadaan yang dikenal karena inovasi, integritas, serta kualitas layanan, guna mendukung pembangunan nasional yang berkelanjutan.</p>
+                                <p style="color: #64748B; line-height: 1.7; font-style: italic; text-align: justify;">To become a leading company in electrical, civil construction, and procurement services, recognized for innovation, integrity, and quality, contributing to sustainable national development.</p>
+                            </div>
+                            <!-- Misi -->
+                            <div style="background: white; border-radius: 12px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.03); border-top: 4px solid var(--secondary);">
+                                <h3 style="font-size: 24px; color: var(--secondary); margin-bottom: 20px; font-weight: 800;"><i class="fas fa-bullseye"></i> Misi (Mission)</h3>
+                                <ol style="color: #4A5568; line-height: 1.7; margin-left: 20px;">
+                                    <li style="margin-bottom: 10px;">Memberikan layanan terbaik yang mengutamakan kualitas, ketepatan, dan keselamatan.</li>
+                                    <li style="margin-bottom: 10px;">Menghadirkan solusi terintegrasi dari perencanaan, konstruksi, hingga pengadaan.</li>
+                                    <li style="margin-bottom: 10px;">Mengembangkan sumber daya manusia yang profesional, berintegritas, dan berkompeten.</li>
+                                    <li style="margin-bottom: 10px;">Menerapkan teknologi terbaru untuk meningkatkan efisiensi dan efektivitas proyek.</li>
+                                    <li>Berkontribusi pada pembangunan berkelanjutan dan peningkatan kesejahteraan masyarakat.</li>
+                                </ol>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Services Section -->
+                <section id="services-profile" class="services-section" style="padding: 120px 8% 60px 8%; background: #fff;">
+                    <span class="section-tag-red" style="display:block; text-align:center;">LAYANAN KAMI</span>
+                    <h2 class="section-title-new" style="text-align:center;">Services</h2>
+                    <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; margin-top: 40px;">
+                        <div style="background: white; border: 1px solid #eee; border-radius: 16px; padding: 30px; transition: transform 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
+                            <div style="width: 60px; height: 60px; border-radius: 12px; background: rgba(59,130,246,0.1); color: #3b82f6; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px;"><i class="fas fa-bolt"></i></div>
+                            <h3 style="font-size: 18px; margin-bottom: 15px; color: #0f172a;">1. Electrical Services</h3>
+                            <ul style="color: #4A5568; line-height: 1.6; margin-left: 15px; font-size: 14px;">
+                                <li>Supervisi NIDI dan Sertifikasi SLO</li>
+                                <li>Instalasi listrik tegangan rendah & menengah</li>
+                                <li>Pembangunan jaringan listrik</li>
+                                <li>Sistem penerangan, panel, & kontrol</li>
+                                <li>Maintenance & upgrading sistem kelistrikan</li>
+                            </ul>
+                        </div>
+                        <div style="background: white; border: 1px solid #eee; border-radius: 16px; padding: 30px; transition: transform 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
+                            <div style="width: 60px; height: 60px; border-radius: 12px; background: rgba(245,158,11,0.1); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px;"><i class="fas fa-hard-hat"></i></div>
+                            <h3 style="font-size: 18px; margin-bottom: 15px; color: #0f172a;">2. Civil Construction</h3>
+                            <ul style="color: #4A5568; line-height: 1.6; margin-left: 15px; font-size: 14px;">
+                                <li>Pembangunan gedung & infrastruktur</li>
+                                <li>Pekerjaan sipil (jalan, drainase, jembatan)</li>
+                                <li>Renovasi & perbaikan fasilitas bangunan</li>
+                                <li>Manajemen proyek konstruksi</li>
+                            </ul>
+                        </div>
+                        <div style="background: white; border: 1px solid #eee; border-radius: 16px; padding: 30px; transition: transform 0.3s; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
+                            <div style="width: 60px; height: 60px; border-radius: 12px; background: rgba(16,185,129,0.1); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 24px; margin-bottom: 20px;"><i class="fas fa-boxes"></i></div>
+                            <h3 style="font-size: 18px; margin-bottom: 15px; color: #0f172a;">3. Procurement</h3>
+                            <ul style="color: #4A5568; line-height: 1.6; margin-left: 15px; font-size: 14px;">
+                                <li>Pengadaan material konstruksi & elektrikal</li>
+                                <li>Supply chain & distribusi peralatan proyek</li>
+                                <li>Pengadaan sesuai spesifikasi & kebutuhan klien</li>
+                                <li>Layanan pengadaan yang efisien, tepat waktu, dan terpercaya</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Core Values Section -->
+                <section id="core-values-profile" class="advantages-section" style="padding: 60px 8%; background: #F8FAFC;">
+                    <span class="section-tag-red" style="display:block; text-align:center;">NILAI PERUSAHAAN</span>
+                    <h2 class="section-title-new" style="text-align:center;">Core Values</h2>
+                    <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-top: 40px;">
+                        <div class="advantage-card">
+                            <div class="advantage-icon"><i class="fas fa-shield-alt"></i></div>
+                            <div class="advantage-text">
+                                <h4>Integrity / Integritas</h4>
+                                <p>Menjunjung tinggi kejujuran, etika, dan kepercayaan.</p>
+                            </div>
+                        </div>
+                        <div class="advantage-card">
+                            <div class="advantage-icon"><i class="fas fa-gem"></i></div>
+                            <div class="advantage-text">
+                                <h4>Quality / Kualitas</h4>
+                                <p>Mengutamakan hasil kerja terbaik dalam setiap proyek.</p>
+                            </div>
+                        </div>
+                        <div class="advantage-card">
+                            <div class="advantage-icon"><i class="fas fa-lightbulb"></i></div>
+                            <div class="advantage-text">
+                                <h4>Innovation / Inovasi</h4>
+                                <p>Terus mengembangkan solusi modern dan efektif.</p>
+                            </div>
+                        </div>
+                        <div class="advantage-card">
+                            <div class="advantage-icon"><i class="fas fa-user-tie"></i></div>
+                            <div class="advantage-text">
+                                <h4>Professionalism</h4>
+                                <p>Didukung oleh tim ahli yang kompeten dan berdedikasi.</p>
+                            </div>
+                        </div>
+                        <div class="advantage-card">
+                            <div class="advantage-icon"><i class="fas fa-leaf"></i></div>
+                            <div class="advantage-text">
+                                <h4>Sustainability</h4>
+                                <p>Berkontribusi pada pembangunan yang ramah lingkungan.</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Clients & Partners Section -->
+                <section id="clients-profile" class="about-section" style="padding: 120px 8% 60px 8%; background: #fff;">
+                    <div style="max-width: 1000px; margin: 0 auto; text-align: center;">
+                        <span class="section-tag-red">KLIEN & MITRA</span>
+                        <h2 class="section-title-new" style="margin-bottom: 30px;">Clients & Partners</h2>
+                        <div style="background: rgba(0, 74, 173, 0.03); padding: 40px; border-radius: 16px; border: 1px solid rgba(0, 74, 173, 0.1);">
+                            <p style="font-size: 16px; color: #4A5568; line-height: 1.8; margin-bottom: 20px;">
+                                PT Winata Solusindo Group telah dipercaya berbagai klien, baik dari sektor swasta maupun pemerintah, untuk mengerjakan proyek elektrikal, konstruksi, dan pengadaan. Dengan komitmen terhadap kepuasan pelanggan, kami selalu menghadirkan hasil yang memenuhi standar nasional maupun internasional.
+                            </p>
+                            <p style="font-size: 15px; color: #64748B; font-style: italic; line-height: 1.6;">
+                                PT Winata Solusindo Group has been trusted by clients from both private and government sectors to deliver electrical, construction, and procurement projects. With a strong commitment to customer satisfaction, we consistently deliver results that meet both national and international standards.
+                            </p>
+                        </div>
+                    </div>
+                </section>
+                
+                <!-- Footer / Contact Us -->
+                <footer class="landing-footer-new" style="background: #0B1E43; color: white; padding: 60px 8% 20px 8%;">
+                    <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-bottom: 40px;">
+                        <div>
+                            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 20px; color: white;">PT Winata Solusindo Group</h3>
+                            <p style="color: #94A3B8; line-height: 1.6; margin-bottom: 10px;">
+                                <i class="fas fa-map-marker-alt" style="margin-right: 10px; color: var(--secondary);"></i>
+                                <strong>Alamat:</strong> Jl. Kenanga 2 RT 7 Kel. Batu Urip, Kec. Lubuklinggau Utara II Kota Lubuklinggau
+                            </p>
+                            <p style="color: #94A3B8; line-height: 1.6; margin-bottom: 10px;">
+                                <i class="fas fa-building" style="margin-right: 10px; color: var(--secondary);"></i>
+                                <strong>Kantor Pelayanan:</strong> Jl Pinangsia (Depan UP3 Lubuklinggau) Kota Lubuklinggau
+                            </p>
+                        </div>
+                        <div>
+                            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 20px; color: white;">Hubungi Kami</h3>
+                            <p style="color: #94A3B8; line-height: 1.6; margin-bottom: 10px;">
+                                <i class="fas fa-phone-alt" style="margin-right: 10px; color: var(--secondary);"></i>
+                                0813 828255 / 081356565667
+                            </p>
+                            <p style="color: #94A3B8; line-height: 1.6; margin-bottom: 10px;">
+                                <i class="fas fa-envelope" style="margin-right: 10px; color: var(--secondary);"></i>
+                                pt.winatasolusindogroup@gmail.com
+                            </p>
+                            <p style="color: #94A3B8; line-height: 1.6;">
+                                <i class="fas fa-globe" style="margin-right: 10px; color: var(--secondary);"></i>
+                                <a href="https://wingroup.id" style="color: #94A3B8; text-decoration: none;">wingroup.id</a>
+                            </p>
+                        </div>
+                    </div>
+                    <div class="footer-bottom-new" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; text-align: center; color: #64748B; font-size: 14px;">
+                        &copy; 2026 PT Winata Solusindo Group - WIN Hub. All rights reserved.
+                    </div>
+                </footer>
+            </div>
+        </div>
     </div>
 
     <!-- ============================================ -->
@@ -301,9 +512,12 @@
         <!-- Main Viewport Area -->
         <main class="portal-main">
             <div class="portal-header">
-                <div class="portal-title">
-                    <h2 id="view-title">Dashboard</h2>
-                    <p id="view-subtitle">Selamat datang kembali di sistem.</p>
+                <div class="portal-title" style="display: flex; align-items: center;">
+                    <button id="mobile-sidebar-toggle" class="mobile-menu-btn" style="display:none; background:none; border:none; font-size:20px; color:var(--primary); cursor:pointer; margin-right: 15px;"><i class="fas fa-bars"></i></button>
+                    <div>
+                        <h2 id="view-title" style="margin-bottom: 5px;">Dashboard</h2>
+                        <p id="view-subtitle" style="margin: 0;">Selamat datang kembali di sistem.</p>
+                    </div>
                 </div>
             </div>
 
@@ -343,6 +557,8 @@
             <i class="fas fa-paper-plane send-icon"></i>
         </div>
     </div>
+
+
 
     <!-- Core Javascript Code -->
     <script src="{{ asset('app.js') }}"></script>

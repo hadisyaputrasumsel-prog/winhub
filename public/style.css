@@ -2317,3 +2317,128 @@ a {
         display: none;
     }
 }
+
+/* Tablet Responsive */
+@media (max-width: 768px) {
+    .hero-section {
+        padding: 100px 5% 50px 5%;
+    }
+    .hero-text h1 {
+        font-size: 34px;
+    }
+    .hero-text p {
+        font-size: 15px;
+    }
+    .services-grid-new, .advantages-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .calc-container-new {
+        padding: 20px;
+    }
+    .charts-grid {
+        grid-template-columns: 1fr;
+    }
+    .chart-card {
+        grid-column: span 1 !important;
+    }
+    .dashboard-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .portal-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .header-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
+
+/* Mobile Phone Responsive */
+@media (max-width: 576px) {
+    .services-grid-new, .advantages-grid {
+        grid-template-columns: 1fr;
+    }
+    .hero-text h1 {
+        font-size: 28px;
+    }
+    .hero-cta {
+        flex-direction: column;
+        width: 100%;
+    }
+    .hero-badges {
+        flex-direction: column;
+        gap: 10px;
+        align-items: center;
+    }
+    .primary-hero-btn, .btn-secondary {
+        width: 100%;
+        justify-content: center;
+    }
+    .calc-group-new {
+        width: 100%;
+        flex: 1 1 100%;
+    }
+    .calc-group-new select {
+        width: 100%;
+    }
+    .dashboard-stats {
+        grid-template-columns: 1fr;
+    }
+    .table-responsive {
+        overflow-x: auto;
+    }
+    .custom-table {
+        min-width: 700px;
+    }
+    /* Mobile Sidebar Handling */
+    .portal-sidebar {
+        transform: translateX(-100%);
+        width: 260px;
+        z-index: 2000;
+        transition: transform 0.3s ease;
+    }
+    .portal-sidebar.mobile-open {
+        transform: translateX(0);
+    }
+    .portal-sidebar .sidebar-title,
+    .portal-sidebar .brand-subtitle,
+    .portal-sidebar .user-profile-widget,
+    .portal-sidebar .menu-item span,
+    .portal-sidebar .btn-logout span {
+        display: block; /* Restore for mobile drawer */
+    }
+    .portal-main {
+        margin-left: 0;
+        padding: 15px;
+    }
+    /* Bottom CTA Section */
+    .bottom-cta-buttons {
+        flex-direction: column;
+    }
+    .bottom-cta-buttons button {
+        width: 100%;
+    }
+    
+    .mobile-menu-btn {
+        display: block !important;
+    }
+    
+    .hide-mobile {
+        display: none !important;
+    }
+    
+    .landing-nav.mobile-active .nav-links {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        padding: 20px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        z-index: 1000;
+    }
+}
