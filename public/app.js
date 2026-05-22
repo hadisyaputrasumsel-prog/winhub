@@ -680,13 +680,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 landingContent.style.display = 'none';
                 companyProfileSection.style.display = 'block';
                 
-                const showSections = ['services-profile', 'core-values-profile'];
+                const showSections = ['services-profile'];
                 showSections.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = 'block';
                 });
 
-                const hideSections = ['about-profile', 'vision-mission-profile', 'clients-profile'];
+                const hideSections = ['about-profile', 'vision-mission-profile', 'core-values-profile', 'clients-profile'];
                 hideSections.forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.style.display = 'none';
