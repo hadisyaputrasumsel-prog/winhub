@@ -18,6 +18,24 @@ return new class extends Migration
             $table->string('keterangan');
         });
 
+        Schema::create('members', function (Blueprint $table) {
+            $table->string('id')->primary();
+            $table->string('nama');
+            $table->string('hp')->nullable();
+            $table->string('status')->nullable();
+        });
+
+        Schema::create('biaya', function (Blueprint $table) {
+            $table->integer('daya')->primary();
+            $table->integer('nidi')->default(0);
+            $table->integer('slo')->default(0);
+            $table->integer('area')->default(0);
+            $table->integer('mitra')->default(0);
+            $table->integer('langganan')->default(0);
+            $table->integer('banyak_rutin')->default(0);
+            $table->integer('pelanggan')->default(0);
+        });
+
         Schema::create('provinsi', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->string('nama');
@@ -92,5 +110,7 @@ return new class extends Migration
         Schema::dropIfExists('kota');
         Schema::dropIfExists('provinsi');
         Schema::dropIfExists('daya');
+        Schema::dropIfExists('members');
+        Schema::dropIfExists('biaya');
     }
 };

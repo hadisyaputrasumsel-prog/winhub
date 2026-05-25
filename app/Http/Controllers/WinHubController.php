@@ -42,7 +42,12 @@ class WinHubController extends Controller
                         $pArr['biaya'] = (int) $pArr['biaya'];
                         return $pArr;
                     })->toArray();
+                    // Load members
+                    $members = DB::table('members')->orderBy('nama', 'ASC')->get()->map(function($x) { return (array)$x; })->toArray();
                     
+                    // Load biaya
+                    $biaya = DB::table('biaya')->orderBy('daya', 'ASC')->get()->map(function($x) { return (array)$x; })->toArray();
+
                     // Load logs
                     $logs = DB::table('logs')->orderBy('time', 'DESC')->limit(200)->get()->map(function ($l) {
                         $lArr = (array) $l;
@@ -63,7 +68,9 @@ class WinHubController extends Controller
                                 'dusun' => $dusun
                             ],
                             'permohonan' => $permohonan,
-                            'logs' => $logs
+                            'logs' => $logs,
+                            'members' => $members,
+                            'biaya' => $biaya
                         ]
                     ]);
                 } catch (\Exception $e) {
@@ -76,6 +83,32 @@ class WinHubController extends Controller
         // POST HANDLERS (MUTATIONS)
         // -----------------------------------------------------------------
         if ($method === 'POST') {
+            if ($action === 'login') {
+                $email = $request->input('email');
+                $password = $request->input('password');
+
+                $user = DB::table('users')->where('email', $email)->first();
+                
+                if ($user && \Illuminate\Support\Facades\Hash::check($password, $user->password)) {
+                    return response()->json([
+                        'success' => true,
+                        'user' => [
+                            'id' => $user->id,
+                            'email' => $user->email,
+                            'name' => $user->name,
+                            'role' => $user->role,
+                            'avatar' => $user->avatar,
+                            'phone' => $user->phone
+                        ]
+                    ]);
+                } else {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Email atau password salah.'
+                    ]);
+                }
+            }
+
             if ($action === 'sync_table') {
                 try {
                     $table = $request->input('table');
@@ -128,9 +161,14 @@ class WinHubController extends Controller
                         DB::table('users')->truncate();
                         
                         foreach ($data as $u) {
+                            $password = $u['password'] ?? 'admin';
+                            if (!str_starts_with($password, '$2y$') && !str_starts_with($password, '$2a$') && !str_starts_with($password, '$2b$')) {
+                                $password = bcrypt($password);
+                            }
                             DB::table('users')->insert([
                                 'id' => $u['id'],
                                 'email' => $u['email'],
+                                'password' => $password,
                                 'name' => $u['name'],
                                 'role' => $u['role'],
                                 'avatar' => $u['avatar'],
@@ -204,7 +242,34 @@ class WinHubController extends Controller
                         }
                         DB::statement('SET FOREIGN_KEY_CHECKS = 1');
                     }
+                    elseif ($table === 'members') {
+                        DB::table('members')->truncate();
+                        foreach ($data as $m) {
+                            DB::table('members')->insert([
+                                'id' => $m['id'],
+                                'nama' => $m['nama'],
+                                'hp' => $m['hp'] ?? null,
+                                'status' => $m['status'] ?? null
+                            ]);
+                        }
+                    }
+                    elseif ($table === 'biaya') {
+                        DB::table('biaya')->truncate();
+                        foreach ($data as $b) {
+                            DB::table('biaya')->insert([
+                                'daya' => (int)$b['daya'],
+                                'nidi' => (int)$b['nidi'],
+                                'slo' => (int)$b['slo'],
+                                'area' => (int)$b['area'],
+                                'mitra' => (int)$b['mitra'],
+                                'langganan' => (int)$b['langganan'],
+                                'banyak_rutin' => (int)($b['banyak_rutin'] ?? 0),
+                                'pelanggan' => (int)$b['pelanggan']
+                            ]);
+                        }
+                    }
                     
+
                     return response()->json([
                         'success' => true, 
                         'message' => "Table $table synchronized successfully!"

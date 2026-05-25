@@ -10,7 +10,77 @@ if (!localStorage.getItem('wh_cleared_transactions_v4')) {
     localStorage.setItem('wh_cleared_transactions_v4', 'true');
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+window.syncTableToMySQL = async function(table, data) {
+    try {
+        const response = await fetch('/api.php?action=sync_table', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ table: table, data: data })
+        });
+        const res = await response.json();
+        if (!res.success) console.error("MySQL Sync Error:", res.error);
+    } catch (e) {
+        console.error("MySQL Sync Failed:", e);
+    }
+};
+
+window.isSyncingDown = false;
+const originalSetItem = localStorage.setItem;
+localStorage.setItem = function(key, value) {
+    originalSetItem.apply(this, arguments);
+    if (!window.isSyncingDown && key.startsWith('wh_')) {
+        const tableMap = {
+            'wh_users': 'users',
+            'wh_daya': 'daya',
+            'wh_wilayah': 'wilayah',
+            'wh_permohonan': 'permohonan',
+            'wh_logs': 'logs',
+            'wh_members': 'members',
+            'wh_biaya': 'biaya'
+        };
+        const table = tableMap[key];
+        if (table && typeof window.syncTableToMySQL === 'function') {
+            window.syncTableToMySQL(table, JSON.parse(value));
+        }
+    }
+};
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+    // 0. FETCH FROM MYSQL
+    try {
+        const response = await fetch('/api.php?action=load_all');
+        const res = await response.json();
+        if (res.success && res.data) {
+            window.isSyncingDown = true;
+            if (res.data.users && res.data.users.length > 0) {
+                // Database is populated, use it as source of truth
+                localStorage.setItem('wh_users', JSON.stringify(res.data.users));
+                if (res.data.daya && res.data.daya.length > 0) localStorage.setItem('wh_daya', JSON.stringify(res.data.daya));
+                if (res.data.wilayah && res.data.wilayah.provinsi && res.data.wilayah.provinsi.length > 0) localStorage.setItem('wh_wilayah', JSON.stringify(res.data.wilayah));
+                if (res.data.permohonan) localStorage.setItem('wh_permohonan', JSON.stringify(res.data.permohonan));
+                if (res.data.logs) localStorage.setItem('wh_logs', JSON.stringify(res.data.logs));
+                if (res.data.members) localStorage.setItem('wh_members', JSON.stringify(res.data.members));
+                if (res.data.biaya && res.data.biaya.length > 0) localStorage.setItem('wh_biaya', JSON.stringify(res.data.biaya));
+            } else {
+                // Database is empty (just migrated). We will let initDatabase() run, then sync UP!
+                setTimeout(() => {
+                    window.isSyncingDown = false;
+                    const ks = ['wh_users', 'wh_daya', 'wh_wilayah', 'wh_members', 'wh_biaya', 'wh_permohonan', 'wh_logs'];
+                    ks.forEach(k => {
+                        const val = localStorage.getItem(k);
+                        if(val) {
+                           const tableMap = {'wh_users':'users','wh_daya':'daya','wh_wilayah':'wilayah','wh_permohonan':'permohonan','wh_logs':'logs','wh_members':'members','wh_biaya':'biaya'};
+                           window.syncTableToMySQL(tableMap[k], JSON.parse(val));
+                        }
+                    });
+                }, 2000);
+            }
+            window.isSyncingDown = false;
+        }
+    } catch(e) {
+        console.error("Failed to load from MySQL:", e);
+    }
 
     // 1. STATE VARIABLES
     let currentUser = JSON.parse(localStorage.getItem('wh_current_user')) || null;
@@ -82,6 +152,28 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
+        // Migrate Biaya (Add Banyak dan Rutin)
+        try {
+            let biayas = JSON.parse(localStorage.getItem('wh_biaya'));
+            if (biayas) {
+                let updated = false;
+                const brMap = {
+                    450: 50000, 900: 70000, 1300: 130000, 2200: 145000, 3500: 132500,
+                    4400: 164000, 5500: 202500, 6600: 281000, 7700: 279500, 10600: 368000,
+                    11000: 340000, 13200: 314000, 16500: 545000, 23000: 740000, 33000: 875000,
+                    41500: 1087500, 53000: 1375000
+                };
+                biayas.forEach(b => {
+                    if (b.banyak_rutin === undefined) {
+                        b.banyak_rutin = brMap[b.daya] || 0;
+                        updated = true;
+                    }
+                });
+                if (updated) localStorage.setItem('wh_biaya', JSON.stringify(biayas));
+            }
+        } catch(e) {}
+
+
         // Master Daya
         if (!localStorage.getItem('wh_daya')) {
             const defaultDaya = [
@@ -97,19 +189,72 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Master Wilayah (Provinsi, Kota, Kecamatan, Desa, Dusun)
+        let currentWilayah = JSON.parse(localStorage.getItem('wh_wilayah'));
+        if (currentWilayah && currentWilayah.provinsi && currentWilayah.provinsi.length < 4) {
+             localStorage.removeItem('wh_wilayah');
+        }
+
         if (!localStorage.getItem('wh_wilayah')) {
             const defaultWilayah = {
                 provinsi: [
-                    { id: 'prov-01', nama: 'Sumatera Selatan' }
+                    { id: 'prov-01', nama: 'Sumatera Selatan' },
+                    { id: 'prov-02', nama: 'Bangka Belitung' },
+                    { id: 'prov-03', nama: 'Jambi' },
+                    { id: 'prov-04', nama: 'Bengkulu' }
                 ],
                 kota: [
+                    // Sumatera Selatan
                     { id: 'kota-01', provinsiId: 'prov-01', nama: 'Palembang' },
                     { id: 'kota-02', provinsiId: 'prov-01', nama: 'Lubuklinggau' },
                     { id: 'kota-03', provinsiId: 'prov-01', nama: 'Ogan Komering Ilir (OKI)' },
                     { id: 'kota-04', provinsiId: 'prov-01', nama: 'Ogan Ilir (OI)' },
                     { id: 'kota-05', provinsiId: 'prov-01', nama: 'Banyuasin' },
                     { id: 'kota-06', provinsiId: 'prov-01', nama: 'Prabumulih' },
-                    { id: 'kota-07', provinsiId: 'prov-01', nama: 'Muara Enim' }
+                    { id: 'kota-07', provinsiId: 'prov-01', nama: 'Muara Enim' },
+                    { id: 'kota-08', provinsiId: 'prov-01', nama: 'Pagar Alam' },
+                    { id: 'kota-09', provinsiId: 'prov-01', nama: 'Lahat' },
+                    { id: 'kota-10', provinsiId: 'prov-01', nama: 'Musi Banyuasin (Muba)' },
+                    { id: 'kota-11', provinsiId: 'prov-01', nama: 'Musi Rawas (Mura)' },
+                    { id: 'kota-12', provinsiId: 'prov-01', nama: 'Musi Rawas Utara (Muratara)' },
+                    { id: 'kota-13', provinsiId: 'prov-01', nama: 'Ogan Komering Ulu (OKU)' },
+                    { id: 'kota-14', provinsiId: 'prov-01', nama: 'OKU Selatan' },
+                    { id: 'kota-15', provinsiId: 'prov-01', nama: 'OKU Timur' },
+                    { id: 'kota-16', provinsiId: 'prov-01', nama: 'Penukal Abab Lematang Ilir (PALI)' },
+                    { id: 'kota-17', provinsiId: 'prov-01', nama: 'Empat Lawang' },
+
+                    // Bangka Belitung
+                    { id: 'kota-18', provinsiId: 'prov-02', nama: 'Pangkal Pinang' },
+                    { id: 'kota-19', provinsiId: 'prov-02', nama: 'Bangka' },
+                    { id: 'kota-20', provinsiId: 'prov-02', nama: 'Bangka Barat' },
+                    { id: 'kota-21', provinsiId: 'prov-02', nama: 'Bangka Selatan' },
+                    { id: 'kota-22', provinsiId: 'prov-02', nama: 'Bangka Tengah' },
+                    { id: 'kota-23', provinsiId: 'prov-02', nama: 'Belitung' },
+                    { id: 'kota-24', provinsiId: 'prov-02', nama: 'Belitung Timur' },
+
+                    // Jambi
+                    { id: 'kota-25', provinsiId: 'prov-03', nama: 'Jambi' },
+                    { id: 'kota-26', provinsiId: 'prov-03', nama: 'Sungai Penuh' },
+                    { id: 'kota-27', provinsiId: 'prov-03', nama: 'Batanghari' },
+                    { id: 'kota-28', provinsiId: 'prov-03', nama: 'Bungo' },
+                    { id: 'kota-29', provinsiId: 'prov-03', nama: 'Kerinci' },
+                    { id: 'kota-30', provinsiId: 'prov-03', nama: 'Merangin' },
+                    { id: 'kota-31', provinsiId: 'prov-03', nama: 'Muaro Jambi' },
+                    { id: 'kota-32', provinsiId: 'prov-03', nama: 'Sarolangun' },
+                    { id: 'kota-33', provinsiId: 'prov-03', nama: 'Tanjung Jabung Barat' },
+                    { id: 'kota-34', provinsiId: 'prov-03', nama: 'Tanjung Jabung Timur' },
+                    { id: 'kota-35', provinsiId: 'prov-03', nama: 'Tebo' },
+
+                    // Bengkulu
+                    { id: 'kota-36', provinsiId: 'prov-04', nama: 'Bengkulu' },
+                    { id: 'kota-37', provinsiId: 'prov-04', nama: 'Bengkulu Selatan' },
+                    { id: 'kota-38', provinsiId: 'prov-04', nama: 'Bengkulu Tengah' },
+                    { id: 'kota-39', provinsiId: 'prov-04', nama: 'Bengkulu Utara' },
+                    { id: 'kota-40', provinsiId: 'prov-04', nama: 'Kaur' },
+                    { id: 'kota-41', provinsiId: 'prov-04', nama: 'Kepahiang' },
+                    { id: 'kota-42', provinsiId: 'prov-04', nama: 'Lebong' },
+                    { id: 'kota-43', provinsiId: 'prov-04', nama: 'Mukomuko' },
+                    { id: 'kota-44', provinsiId: 'prov-04', nama: 'Rejang Lebong' },
+                    { id: 'kota-45', provinsiId: 'prov-04', nama: 'Seluma' }
                 ],
                 kecamatan: [
                     // Palembang
@@ -678,43 +823,61 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         if (loginForm) {
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = document.getElementById('login-email').value.trim();
                 const pass = document.getElementById('login-password').value.trim();
-
-                const users = JSON.parse(localStorage.getItem('wh_users')) || [];
-                const matchedUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
                 
-                // Use user.password if it exists, else fallback to 'admin'
-                const validPass = matchedUser && matchedUser.password ? matchedUser.password : 'admin';
+                const loginBtn = loginForm.querySelector('.btn-login');
+                const originalText = loginBtn.innerHTML;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memeriksa...';
+                loginBtn.disabled = true;
 
-                if (matchedUser && pass === validPass) {
-                    // Success Login
-                    currentUser = matchedUser;
-                    localStorage.setItem('wh_current_user', JSON.stringify(currentUser));
-                    
-                    if (currentUser.role === 'Super Admin') {
-                        localStorage.setItem('wh_is_superadmin', 'true');
-                    } else {
-                        localStorage.removeItem('wh_is_superadmin');
-                    }
-                    
-                    Swal.fire({
-                        title: 'Login Berhasil!',
-                        text: `Selamat datang kembali, ${currentUser.name}! Anda masuk sebagai ${currentUser.role}.`,
-                        icon: 'success',
-                        timer: 2000,
-                        showConfirmButton: false
-                    }).then(() => {
-                        applyThemeAndLayout();
+                try {
+                    const response = await fetch('/api.php?action=login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email, password: pass })
                     });
-                } else {
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        currentUser = result.user;
+                        localStorage.setItem('wh_current_user', JSON.stringify(currentUser));
+                        
+                        if (currentUser.role === 'Super Admin') {
+                            localStorage.setItem('wh_is_superadmin', 'true');
+                        } else {
+                            localStorage.removeItem('wh_is_superadmin');
+                        }
+                        
+                        Swal.fire({
+                            title: 'Login Berhasil!',
+                            text: `Selamat datang kembali, ${currentUser.name}! Anda masuk sebagai ${currentUser.role}.`,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            applyThemeAndLayout();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Login Gagal',
+                            text: result.error || 'Email atau password salah.',
+                            icon: 'error'
+                        });
+                    }
+                } catch (err) {
+                    console.error("Login Error:", err);
                     Swal.fire({
-                        title: 'Login Gagal',
-                        text: 'Email atau password (default: admin) salah. Silakan coba lagi.',
+                        title: 'Error',
+                        text: 'Terjadi kesalahan saat menghubungi server.',
                         icon: 'error'
                     });
+                } finally {
+                    loginBtn.innerHTML = originalText;
+                    loginBtn.disabled = false;
                 }
             });
         }
@@ -1302,11 +1465,50 @@ document.addEventListener('DOMContentLoaded', () => {
         const lunasCount = data.filter(x => x.pembayaranStatus === 'Paid').length;
         const outstandingCount = data.filter(x => x.pembayaranStatus === 'Unpaid').length;
 
+        // Calculate Daily, Monthly, Yearly Revenue
+        const todayStr = new Date().toISOString().split('T')[0];
+        const monthStr = todayStr.substring(0, 7);
+        const yearStr = todayStr.substring(0, 4);
+
+        const paidData = data.filter(x => x.pembayaranStatus === 'Paid');
+        const dailyRev = paidData.filter(x => (x.tanggalInput || '').startsWith(todayStr)).reduce((s, i) => s + i.biaya, 0);
+        const monthlyRev = paidData.filter(x => (x.tanggalInput || '').startsWith(monthStr)).reduce((s, i) => s + i.biaya, 0);
+        const yearlyRev = paidData.filter(x => (x.tanggalInput || '').startsWith(yearStr)).reduce((s, i) => s + i.biaya, 0);
+
         container.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                <h4 style="margin:0; color:#f8fafc;"><i class="fas fa-chart-line"></i> Ringkasan Laporan Pendapatan</h4>
+                <button class="btn-action primary" id="btn-print-laporan" style="font-size:12px; padding:6px 12px;"><i class="fas fa-print"></i> Cetak Laporan</button>
+            </div>
+            <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 25px;">
+                <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); border:none;">
+                    <div class="stat-card-details">
+                        <p style="color:rgba(255,255,255,0.9);">Harian (Hari Ini)</p>
+                        <h3 style="color:white;">Rp ${formatCurrency(dailyRev)}</h3>
+                    </div>
+                    <div class="stat-card-icon" style="color:rgba(255,255,255,0.3);"><i class="fas fa-calendar-day"></i></div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%); border:none;">
+                    <div class="stat-card-details">
+                        <p style="color:rgba(255,255,255,0.9);">Bulanan (Bulan Ini)</p>
+                        <h3 style="color:white;">Rp ${formatCurrency(monthlyRev)}</h3>
+                    </div>
+                    <div class="stat-card-icon" style="color:rgba(255,255,255,0.3);"><i class="fas fa-calendar-alt"></i></div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); border:none;">
+                    <div class="stat-card-details">
+                        <p style="color:rgba(255,255,255,0.9);">Tahunan (Tahun Ini)</p>
+                        <h3 style="color:white;">Rp ${formatCurrency(yearlyRev)}</h3>
+                    </div>
+                    <div class="stat-card-icon" style="color:rgba(255,255,255,0.3);"><i class="fas fa-calendar"></i></div>
+                </div>
+            </div>
+
+            <h4 style="margin-bottom:15px; color:#f8fafc;"><i class="fas fa-wallet"></i> Status Keuangan Keseluruhan</h4>
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-card-details">
-                        <p>Total Pendapatan Masuk</p>
+                        <p>Total Pendapatan (All Time)</p>
                         <h3>Rp ${formatCurrency(totalRevenue)}</h3>
                     </div>
                     <div class="stat-card-icon"><i class="fas fa-hand-holding-usd"></i></div>
@@ -1363,6 +1565,174 @@ document.addEventListener('DOMContentLoaded', () => {
                 activeTab = 'keuangan-verif';
                 renderSidebar();
                 renderPortalView();
+            });
+        }
+        
+        const btnPrint = document.getElementById('btn-print-laporan');
+        if (btnPrint) {
+            btnPrint.addEventListener('click', () => {
+                Swal.fire({
+                    title: 'Pilih Rentang Waktu Laporan',
+                    html: `
+                        <div style="display:flex; flex-direction:column; gap:15px; text-align:left; margin-top:10px;">
+                            <div>
+                                <label style="font-weight:bold; margin-bottom:5px; display:block;">Dari Tanggal</label>
+                                <input type="date" id="print-start-date" class="swal2-input" style="width:100%; margin:0; box-sizing:border-box;">
+                            </div>
+                            <div>
+                                <label style="font-weight:bold; margin-bottom:5px; display:block;">Sampai Tanggal</label>
+                                <input type="date" id="print-end-date" class="swal2-input" style="width:100%; margin:0; box-sizing:border-box;">
+                            </div>
+                            <div style="font-size:12px; color:#666;">
+                                * Kosongkan tanggal jika ingin menampilkan semua rentang waktu
+                            </div>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonColor: '#004AAD',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Preview Laporan',
+                    cancelButtonText: 'Batal',
+                    preConfirm: () => {
+                        return {
+                            start: document.getElementById('print-start-date').value,
+                            end: document.getElementById('print-end-date').value
+                        }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        const { start, end } = result.value;
+                        let filteredData = paidData;
+                        
+                        let periodText = 'Keseluruhan Waktu';
+                        
+                        if (start || end) {
+                            filteredData = paidData.filter(p => {
+                                const d = new Date(p.tanggalInput).getTime();
+                                const s = start ? new Date(start + 'T00:00:00').getTime() : 0;
+                                const e = end ? new Date(end + 'T23:59:59').getTime() : Infinity;
+                                return d >= s && d <= e;
+                            });
+                            
+                            if (start && end) {
+                                periodText = `${new Date(start).toLocaleDateString('id-ID')} s/d ${new Date(end).toLocaleDateString('id-ID')}`;
+                            } else if (start) {
+                                periodText = `Sejak ${new Date(start).toLocaleDateString('id-ID')}`;
+                            } else if (end) {
+                                periodText = `Hingga ${new Date(end).toLocaleDateString('id-ID')}`;
+                            }
+                        }
+                        
+                        // Calculate summary for the filtered data
+                        let totalFiltered = 0;
+                        let fDaily = 0, fMonthly = 0, fYearly = 0;
+                        const now = new Date();
+                        const todayStr = now.toISOString().split('T')[0];
+                        const thisMonth = now.getMonth();
+                        const thisYear = now.getFullYear();
+
+                        filteredData.forEach(p => {
+                            const val = parseInt(p.biaya) || 0;
+                            totalFiltered += val;
+                            const d = new Date(p.tanggalInput);
+                            const dStr = d.toISOString().split('T')[0];
+                            if (dStr === todayStr) fDaily += val;
+                            if (d.getMonth() === thisMonth && d.getFullYear() === thisYear) fMonthly += val;
+                            if (d.getFullYear() === thisYear) fYearly += val;
+                        });
+
+                        const w = window.open('', '_blank');
+                        w.document.write(`
+                            <html>
+                            <head>
+                                <title>Preview Laporan - WinHub</title>
+                                <style>
+                                    body { font-family: 'Inter', Arial, sans-serif; padding: 30px; color: #333; background: #f4f7f6; }
+                                    .report-container { max-width: 900px; margin: 0 auto; background: #fff; padding: 40px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-radius: 8px; }
+                                    h1, h2 { text-align: center; color: #004AAD; }
+                                    .header-info { text-align:center; color:#666; margin-top:-10px; margin-bottom: 30px; font-size:14px; }
+                                    table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+                                    th, td { border: 1px solid #e0e0e0; padding: 12px; text-align: left; }
+                                    th { background: #004AAD; color: white; }
+                                    tr:nth-child(even) { background-color: #f9f9f9; }
+                                    .summary { display: flex; justify-content: space-between; margin-top: 20px; gap: 15px; flex-wrap: wrap; }
+                                    .summary-box { border: 1px solid #e2e8f0; padding: 20px; flex: 1; min-width: 150px; border-radius: 8px; background:#fff; text-align:center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+                                    .summary-box.highlight { border-color: #004AAD; background: #f0f7ff; }
+                                    .summary-box h3 { margin-top:0; font-size:13px; color:#64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+                                    .summary-box p { font-size:22px; font-weight:bold; margin:10px 0 0; color:#0f172a; }
+                                    .controls { text-align: center; margin-bottom: 20px; }
+                                    .btn-print { background: #004AAD; color: #fff; border: none; padding: 12px 25px; font-size: 16px; border-radius: 5px; cursor: pointer; font-weight: bold; }
+                                    .btn-print:hover { background: #003680; }
+                                    @media print {
+                                        body { padding: 0; background: #fff; }
+                                        .report-container { box-shadow: none; padding: 0; }
+                                        .controls, .no-print { display: none !important; }
+                                        .summary-box { page-break-inside: avoid; }
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="controls no-print">
+                                    <button class="btn-print" onclick="window.print()">🖨️ Cetak Laporan Sekarang</button>
+                                </div>
+                                <div class="report-container">
+                                    <h1>Laporan Pendapatan Keuangan</h1>
+                                    <div class="header-info">
+                                        Periode: <strong>${periodText}</strong><br>
+                                        Dicetak pada: ${new Date().toLocaleDateString('id-ID')} | Oleh: ${currentUser ? currentUser.name : 'Admin'}
+                                    </div>
+                                    
+                                    <div class="summary">
+                                        <div class="summary-box">
+                                            <h3>Harian (Di Rentang)</h3>
+                                            <p>Rp ${formatCurrency(fDaily)}</p>
+                                        </div>
+                                        <div class="summary-box">
+                                            <h3>Bulanan (Di Rentang)</h3>
+                                            <p>Rp ${formatCurrency(fMonthly)}</p>
+                                        </div>
+                                        <div class="summary-box">
+                                            <h3>Tahunan (Di Rentang)</h3>
+                                            <p>Rp ${formatCurrency(fYearly)}</p>
+                                        </div>
+                                        <div class="summary-box highlight">
+                                            <h3 style="color:#004AAD;">Total Terpilih</h3>
+                                            <p style="color:#004AAD;">Rp ${formatCurrency(totalFiltered)}</p>
+                                        </div>
+                                    </div>
+
+                                    <h2 style="margin-top: 40px; font-size:18px; text-align:left; color:#333; border-bottom:2px solid #004AAD; padding-bottom:10px;">Rincian Transaksi Lunas</h2>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Tanggal</th>
+                                                <th>No. Permohonan</th>
+                                                <th>Nama Pelanggan</th>
+                                                <th>Jenis Permohonan</th>
+                                                <th>Nominal (Rp)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${filteredData.sort((a,b) => new Date(b.tanggalInput) - new Date(a.tanggalInput)).map((p, idx) => `
+                                                <tr>
+                                                    <td>${idx + 1}</td>
+                                                    <td>${new Date(p.tanggalInput).toLocaleDateString('id-ID')}</td>
+                                                    <td>${p.id}</td>
+                                                    <td>${p.namaPelanggan}</td>
+                                                    <td>${p.jenisPermohonan}</td>
+                                                    <td>${formatCurrency(p.biaya)}</td>
+                                                </tr>
+                                            `).join('') || '<tr><td colspan="6" style="text-align:center; padding: 20px;">Tidak ada transaksi lunas pada periode ini.</td></tr>'}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </body>
+                            </html>
+                        `);
+                        w.document.close();
+                    }
+                });
             });
         }
     }
@@ -2948,6 +3318,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                     <th>AREA</th>
                                     <th>MITRA</th>
                                     <th>LANGGANAN</th>
+                                    <th>BANYAK & RUTIN</th>
                                     <th>PELANGGAN</th>
                                     <th>AKSI</th>
                                 </tr>
@@ -2961,6 +3332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                         <td>Rp ${formatCurrency(b.area)}</td>
                                         <td>Rp ${formatCurrency(b.mitra)}</td>
                                         <td>Rp ${formatCurrency(b.langganan)}</td>
+                                        <td><strong>Rp ${formatCurrency(b.banyak_rutin || 0)}</strong></td>
                                         <td><strong>Rp ${formatCurrency(b.pelanggan)}</strong></td>
                                         <td>
                                             <div style="display:flex; gap:6px;">
@@ -3483,6 +3855,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     userList.push(newUser);
                     localStorage.setItem('wh_users', JSON.stringify(userList));
+                    if (typeof syncTableToMySQL === 'function') syncTableToMySQL('users', userList);
                     logActivity(currentUser.name, `Meregistrasikan user baru ${result.value.name} dengan role ${result.value.role}`);
                     renderPortalView();
                 }
@@ -3709,10 +4082,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 const idx = list.findIndex(x => x.id === id);
                 if (idx !== -1) {
                     const name = list[idx].name;
-                    list.splice(idx, 1);
-                    localStorage.setItem('wh_users', JSON.stringify(list));
-                    logActivity(currentUser.name, `Menghapus akun user: ${name}`);
-                    renderPortalView();
+                    Swal.fire({
+                        title: 'Konfirmasi Hapus',
+                        text: `Apakah Anda yakin ingin menghapus user "${name}"?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#ef4444',
+                        confirmButtonText: 'Ya, Hapus',
+                        cancelButtonText: 'Batal'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            list.splice(idx, 1);
+                            localStorage.setItem('wh_users', JSON.stringify(list));
+                            if (typeof syncTableToMySQL === 'function') syncTableToMySQL('users', list);
+                            logActivity(currentUser.name, `Menghapus akun user: ${name}`);
+                            Swal.fire('Terhapus!', 'User berhasil dihapus.', 'success');
+                            renderPortalView();
+                        }
+                    });
                 }
             });
         });
@@ -3840,6 +4227,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             userList[idx].avatar = letters.length > 1 ? (letters[0][0] + letters[1][0]).toUpperCase() : result.value.name.substring(0,2).toUpperCase();
 
                             localStorage.setItem('wh_users', JSON.stringify(userList));
+                            if (typeof syncTableToMySQL === 'function') syncTableToMySQL('users', userList);
                             logActivity(currentUser.name, `Memperbarui profil user: ${result.value.name}`);
                             
                             // If editing currently logged in user, also update session
@@ -3876,6 +4264,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <option value="Area">Area</option>
                             <option value="Mitra">Mitra</option>
                             <option value="Langganan">Langganan</option>
+                            <option value="Banyak dan Rutin">Banyak & Rutin</option>
                         </select>
                     `,
                     focusConfirm: false,
@@ -3926,6 +4315,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             <option value="Area" ${(item.status || 'Pelanggan') === 'Area' ? 'selected' : ''}>Area</option>
                             <option value="Mitra" ${(item.status || 'Pelanggan') === 'Mitra' ? 'selected' : ''}>Mitra</option>
                             <option value="Langganan" ${(item.status || 'Pelanggan') === 'Langganan' ? 'selected' : ''}>Langganan</option>
+                            <option value="Banyak dan Rutin" ${(item.status || 'Pelanggan') === 'Banyak dan Rutin' ? 'selected' : ''}>Banyak & Rutin</option>
                         </select>
                     `,
                     focusConfirm: false,
@@ -3994,6 +4384,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" id="add-b-area" class="swal2-input" placeholder="Biaya Area" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
                         <input type="number" id="add-b-mitra" class="swal2-input" placeholder="Biaya Mitra" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
                         <input type="number" id="add-b-langganan" class="swal2-input" placeholder="Biaya Langganan" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
+                        <input type="number" id="add-b-banyak-rutin" class="swal2-input" placeholder="Biaya Banyak & Rutin" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
                         <input type="number" id="add-b-pelanggan" class="swal2-input" placeholder="Biaya Pelanggan" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
                     `,
                     focusConfirm: false,
@@ -4008,6 +4399,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             area: parseInt(document.getElementById('add-b-area').value) || 0,
                             mitra: parseInt(document.getElementById('add-b-mitra').value) || 0,
                             langganan: parseInt(document.getElementById('add-b-langganan').value) || 0,
+                            banyak_rutin: parseInt(document.getElementById('add-b-banyak-rutin').value) || 0,
                             pelanggan: parseInt(document.getElementById('add-b-pelanggan').value) || 0,
                         };
                     }
@@ -4039,6 +4431,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="number" id="edit-b-area" class="swal2-input" value="${item.area}" placeholder="Biaya Area" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
                         <input type="number" id="edit-b-mitra" class="swal2-input" value="${item.mitra}" placeholder="Biaya Mitra" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
                         <input type="number" id="edit-b-langganan" class="swal2-input" value="${item.langganan}" placeholder="Biaya Langganan" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
+                        <input type="number" id="edit-b-banyak-rutin" class="swal2-input" value="${item.banyak_rutin || 0}" placeholder="Biaya Banyak & Rutin" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
                         <input type="number" id="edit-b-pelanggan" class="swal2-input" value="${item.pelanggan}" placeholder="Biaya Pelanggan" style="margin-top:0; margin-bottom:10px; height: 40px; font-size:14px;">
                     `,
                     focusConfirm: false,
@@ -4053,6 +4446,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             area: parseInt(document.getElementById('edit-b-area').value) || 0,
                             mitra: parseInt(document.getElementById('edit-b-mitra').value) || 0,
                             langganan: parseInt(document.getElementById('edit-b-langganan').value) || 0,
+                            banyak_rutin: parseInt(document.getElementById('edit-b-banyak-rutin').value) || 0,
                             pelanggan: parseInt(document.getElementById('edit-b-pelanggan').value) || 0,
                         };
                     }
