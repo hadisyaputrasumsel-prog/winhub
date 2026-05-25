@@ -12,89 +12,8 @@ if (!localStorage.getItem('wh_cleared_transactions_v4')) {
 
 document.addEventListener('DOMContentLoaded', () => {
 
-    // 0. GLOBAL DB CACHE STORE & LOCALSTORAGE INTERCEPTOR FOR MYSQL INTEGRATION
-    window.dbStore = {
-        users: [],
-        daya: [],
-        wilayah: {},
-        permohonan: [],
-        logs: []
-    };
-
-    const originalGetItem = localStorage.getItem.bind(localStorage);
-    const originalSetItem = localStorage.setItem.bind(localStorage);
-
-    localStorage.getItem = function(key) {
-        if (key === 'wh_users') {
-            return window.dbStore.users && window.dbStore.users.length > 0 ? JSON.stringify(window.dbStore.users) : null;
-        }
-        if (key === 'wh_daya') {
-            return window.dbStore.daya && window.dbStore.daya.length > 0 ? JSON.stringify(window.dbStore.daya) : null;
-        }
-        if (key === 'wh_wilayah') {
-            return window.dbStore.wilayah && Object.keys(window.dbStore.wilayah).length > 0 ? JSON.stringify(window.dbStore.wilayah) : null;
-        }
-        if (key === 'wh_permohonan') {
-            return window.dbStore.permohonan && window.dbStore.permohonan.length > 0 ? JSON.stringify(window.dbStore.permohonan) : null;
-        }
-        if (key === 'wh_logs') {
-            return window.dbStore.logs && window.dbStore.logs.length > 0 ? JSON.stringify(window.dbStore.logs) : null;
-        }
-        return originalGetItem(key);
-    };
-
-    localStorage.setItem = function(key, value) {
-        if (key === 'wh_users') {
-            window.dbStore.users = JSON.parse(value);
-            syncTableToMySQL('users', window.dbStore.users);
-            return;
-        }
-        if (key === 'wh_daya') {
-            window.dbStore.daya = JSON.parse(value);
-            syncTableToMySQL('daya', window.dbStore.daya);
-            return;
-        }
-        if (key === 'wh_wilayah') {
-            window.dbStore.wilayah = JSON.parse(value);
-            syncTableToMySQL('wilayah', window.dbStore.wilayah);
-            return;
-        }
-        if (key === 'wh_permohonan') {
-            window.dbStore.permohonan = JSON.parse(value);
-            syncTableToMySQL('permohonan', window.dbStore.permohonan);
-            return;
-        }
-        if (key === 'wh_logs') {
-            window.dbStore.logs = JSON.parse(value);
-            syncTableToMySQL('logs', window.dbStore.logs);
-            return;
-        }
-        originalSetItem(key, value);
-    };
-
-    function syncTableToMySQL(table, data) {
-        fetch('api.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                action: 'sync_table',
-                table: table,
-                data: data
-            })
-        })
-        .then(r => r.json())
-        .then(res => {
-            if (!res.success) {
-                console.error(`Failed to sync table ${table} to MySQL:`, res.error);
-            } else {
-                console.log(`Synced table ${table} to MySQL successfully.`);
-            }
-        })
-        .catch(err => console.error(`Error syncing table ${table}:`, err));
-    }
-
     // 1. STATE VARIABLES
-    let currentUser = JSON.parse(originalGetItem('wh_current_user')) || null;
+    let currentUser = JSON.parse(localStorage.getItem('wh_current_user')) || null;
     let activeTab = 'dashboard';
     
     // 2. UI ELEMENT REFERENCES
@@ -103,72 +22,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const portalSection = document.getElementById('portal-section');
     const roleSwitcherBar = document.getElementById('role-switcher-bar');
 
-    // 3. CORE ASYNCHRONOUS INITIALIZER FROM MYSQL
-    fetch('api.php?action=load_all')
-        .then(r => r.json())
-        .then(res => {
-            if (res.success && res.data.users && res.data.users.length > 0) {
-                window.dbStore = res.data;
-                console.log("Loaded all data from MySQL DB:", window.dbStore);
-                
-                // Ensure Super Admin and phone migrations are applied to the MySQL-loaded user list
-                let usersUpdated = false;
-                let loadedUsers = res.data.users || [];
-                
-                // Add Super Admin if missing
-                if (!loadedUsers.some(u => u.email.toLowerCase() === 'superadmin@winhub.com')) {
-                    loadedUsers.push({ id: 'usr-00', email: 'superadmin@winhub.com', name: 'Super Admin', role: 'Super Admin', avatar: 'SA', phone: '6281234567890' });
-                    usersUpdated = true;
-                }
-
-                // Add default phones if missing
-                const defaultsMap = {
-                    'usr-00': '6281234567890',
-                    'usr-01': '6281234567891',
-                    'usr-02': '6281234567892',
-                    'usr-03': '6281234567893',
-                    'usr-04': '6281234567894',
-                    'usr-05': '6281234567895',
-                    'usr-06': '6281234567896'
-                };
-                loadedUsers.forEach(u => {
-                    if (defaultsMap[u.id] && !u.phone) {
-                        u.phone = defaultsMap[u.id];
-                        usersUpdated = true;
-                    }
-                });
-
-                if (usersUpdated) {
-                    window.dbStore.users = loadedUsers;
-                    localStorage.setItem('wh_users', JSON.stringify(loadedUsers));
-                    syncTableToMySQL('users', loadedUsers);
-                } else {
-                    localStorage.setItem('wh_users', JSON.stringify(loadedUsers));
-                }
-
-                // Run bindings
-                applyThemeAndLayout();
-                initLandingPageEvents();
-                initLoginEvents();
-                initPortalEvents();
-            } else {
-                console.warn("MySQL data is empty or invalid, falling back to local database seeding:", res.error);
-                initDatabase();
-                applyThemeAndLayout();
-                initLandingPageEvents();
-                initLoginEvents();
-                initPortalEvents();
-            }
-        })
-        .catch(err => {
-            console.error("Error connecting to WinHub MySQL REST API, falling back to local database:", err);
-            // Fallback to offline localstorage database
-            initDatabase();
-            applyThemeAndLayout();
-            initLandingPageEvents();
-            initLoginEvents();
-            initPortalEvents();
-        });
+    // 3. CORE INITIALIZER
+    initDatabase();
+    applyThemeAndLayout();
+    initLandingPageEvents();
+    initLoginEvents();
+    initPortalEvents();
     
     // Functions declarations
     function initDatabase() {
