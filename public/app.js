@@ -12,7 +12,7 @@ if (!localStorage.getItem('wh_cleared_transactions_v4')) {
 
 window.syncTableToMySQL = async function(table, data) {
     try {
-        const response = await fetch('/api.php?action=sync_table', {
+        const response = await fetch('/api/winhub?action=sync_table', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ table: table, data: data })
@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 0. FETCH FROM MYSQL
     try {
-        const response = await fetch('/api.php?action=load_all');
+        const response = await fetch('/api/winhub?action=load_all');
         const res = await response.json();
         if (res.success && res.data) {
             window.isSyncingDown = true;
@@ -834,7 +834,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 loginBtn.disabled = true;
 
                 try {
-                    const response = await fetch('/api.php?action=login', {
+                    const response = await fetch('/api/winhub?action=login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email: email, password: pass })

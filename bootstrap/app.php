@@ -12,8 +12,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->validateCsrfTokens(except: [
-            'api.php',
-            'api.php/*',
+            'api/winhub',
+            'api/winhub/*',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

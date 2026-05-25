@@ -6,4 +6,4 @@ Route::get('/', function () {
     return view('winhub');
 });
 
-Route::match(['get', 'post'], '/api.php', [App\Http\Controllers\WinHubController::class, 'handleApi']);
+Route::match(['get', 'post'], '/api/winhub', [App\Http\Controllers\WinHubController::class, 'handleApi']);
