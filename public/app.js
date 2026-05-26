@@ -5212,6 +5212,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (e) {
             // Silently ignore network errors during polling
         }
-    }, 5000);
+    }, 1500);
 
 });
