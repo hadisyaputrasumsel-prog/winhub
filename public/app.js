@@ -4570,7 +4570,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    function openRequestDetailModal(id) {
+    async function openRequestDetailModal(id) {
+        // Bypass cache: Tarik data murni dari server sebelum membuka modal
+        try {
+            const btnAssign = document.activeElement;
+            if (btnAssign) {
+                const oriText = btnAssign.innerHTML;
+                btnAssign.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                const response = await fetch('/api/winhub?action=load_all');
+                const res = await response.json();
+                if (res.success && res.data) {
+                    window.isSyncingDown = true;
+                    if (res.data.users && res.data.users.length > 0) localStorage.setItem('wh_users', JSON.stringify(res.data.users));
+                    if (res.data.permohonan) localStorage.setItem('wh_permohonan', JSON.stringify(res.data.permohonan));
+                    window.isSyncingDown = false;
+                }
+                btnAssign.innerHTML = oriText;
+            }
+        } catch (e) {
+            console.error("Failed to fetch real-time data:", e);
+        }
+
         const data = JSON.parse(localStorage.getItem('wh_permohonan')) || [];
         const item = data.find(x => x.id === id);
 
