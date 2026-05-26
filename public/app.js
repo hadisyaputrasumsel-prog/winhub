@@ -5175,4 +5175,43 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
+
+    // ==========================================
+    // REAL-TIME MULTI-USER POLLING (5 Seconds)
+    // ==========================================
+    setInterval(async () => {
+        if (!currentUser) return; // Only poll if logged in
+        if (Swal.isVisible()) return; // Don't interrupt if user is interacting with Swal
+        const modalOverlay = document.getElementById('modal-overlay');
+        if (modalOverlay && modalOverlay.style.display === 'flex') return; // Don't interrupt open modals
+
+        try {
+            const response = await fetch('/api/winhub?action=load_all');
+            const res = await response.json();
+            if (res.success && res.data) {
+                const currentPermohonan = localStorage.getItem('wh_permohonan');
+                const newPermohonan = res.data.permohonan ? JSON.stringify(res.data.permohonan) : currentPermohonan;
+                
+                const currentUsers = localStorage.getItem('wh_users');
+                const newUsers = (res.data.users && res.data.users.length > 0) ? JSON.stringify(res.data.users) : currentUsers;
+
+                if (currentPermohonan !== newPermohonan || currentUsers !== newUsers) {
+                    window.isSyncingDown = true;
+                    if (res.data.users && res.data.users.length > 0) localStorage.setItem('wh_users', newUsers);
+                    if (res.data.permohonan) localStorage.setItem('wh_permohonan', newPermohonan);
+                    if (res.data.daya) localStorage.setItem('wh_daya', JSON.stringify(res.data.daya));
+                    if (res.data.biaya) localStorage.setItem('wh_biaya', JSON.stringify(res.data.biaya));
+                    window.isSyncingDown = false;
+
+                    // Automatically refresh the current view to show new data
+                    if (typeof renderPortalView === 'function') {
+                        renderPortalView();
+                    }
+                }
+            }
+        } catch (e) {
+            // Silently ignore network errors during polling
+        }
+    }, 5000);
+
 });
