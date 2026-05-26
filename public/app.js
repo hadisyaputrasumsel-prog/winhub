@@ -4584,6 +4584,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Build Modal Body based on Role & Status
         let actionFormHtml = '';
+        const usersList = JSON.parse(localStorage.getItem('wh_users')) || [];
+        const ttNidiOptions = usersList.filter(u => u.role === 'TT NIDI' || u.role === 'Super Admin').map(u => `<option value="${u.id}">${u.name} (${u.role})</option>`).join('');
+        const ttSloOptions = usersList.filter(u => u.role === 'TT SLO' || u.role === 'Super Admin').map(u => `<option value="${u.id}">${u.name} (${u.role})</option>`).join('');
 
         if (currentUser.role === 'Admin Proses' && item.status === 'Waiting Process') {
             // Assign TT NIDI or TT SLO depending on selection
@@ -4592,7 +4595,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="form-field">
                     <label>Pilih Tenaga Teknik (TT) NIDI</label>
                     <select id="mdl-assign-tt" class="form-input">
-                        <option value="usr-03">Tono NIDI</option>
+                        ${ttNidiOptions || '<option value="">-- Tidak ada TT NIDI --</option>'}
                     </select>
                 </div>
                 <div class="form-field">
@@ -4608,7 +4611,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="form-field">
                     <label>Pilih Tenaga Teknik (TT) SLO</label>
                     <select id="mdl-assign-tt-slo" class="form-input">
-                        <option value="usr-04">Slamet SLO</option>
+                        ${ttSloOptions || '<option value="">-- Tidak ada TT SLO --</option>'}
                     </select>
                 </div>
                 <div class="form-field">

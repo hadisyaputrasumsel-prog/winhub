@@ -121,7 +121,9 @@ class WinHubController extends Controller
                         foreach ($data as $p) {
                             DB::table('permohonan')->insert([
                                 'id' => $p['id'],
+                                'statusMember' => $p['statusMember'] ?? null,
                                 'namaPemohon' => $p['namaPemohon'],
+                                'hp' => $p['hp'] ?? null,
                                 'nik' => $p['nik'],
                                 'namaPelanggan' => $p['namaPelanggan'],
                                 'daya' => $p['daya'],
