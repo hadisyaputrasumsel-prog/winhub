@@ -561,6 +561,6 @@
 
 
     <!-- Core Javascript Code -->
-    <script src="{{ asset('app.js') }}"></script>
+    <script src="{{ asset('app.js') }}?v={{ time() }}"></script>
 </body>
 </html>
