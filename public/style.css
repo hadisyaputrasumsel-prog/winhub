@@ -1322,15 +1322,18 @@ a {
     top: 0;
     left: 0;
     width: 100%;
-    height: 40px;
+    min-height: 40px;
     background: linear-gradient(90deg, #10162F 0%, #070B19 100%);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     z-index: 1001;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
+    justify-content: flex-start;
+    gap: 15px;
+    padding: 0 15px;
     font-size: 12px;
+    overflow-x: auto;
+    white-space: nowrap;
 }
 
 .role-switcher-label {
@@ -2411,7 +2414,9 @@ a {
     }
     .portal-main {
         margin-left: 0;
-        padding: 15px;
+        padding: 60px 15px 15px 15px;
+        max-width: 100vw;
+        overflow-x: hidden;
     }
     /* Bottom CTA Section */
     .bottom-cta-buttons {
