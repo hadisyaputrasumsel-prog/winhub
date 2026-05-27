@@ -2423,14 +2423,35 @@ a {
     .bottom-cta-buttons button {
         width: 100%;
     }
-    .role-switcher-bar {
-        display: none !important;
-    }
+    
     .portal-main {
         margin-left: 0;
-        padding: 15px 15px 15px 15px; /* Kurangi padding atas karena role switcher hilang */
+        padding: 60px 15px 15px 15px; /* Kembalikan padding karena role switcher dikembalikan */
         max-width: 100vw;
         overflow-x: hidden;
+    }
+    
+    .table-responsive::-webkit-scrollbar {
+        height: 6px;
+    }
+    .table-responsive::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 3px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 3px;
+    }
+    
+    .role-switcher-bar::-webkit-scrollbar {
+        height: 4px;
+    }
+    .role-switcher-bar::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    .role-switcher-bar::-webkit-scrollbar-thumb {
+        background: var(--primary);
+        border-radius: 2px;
     }
     
     .mobile-menu-btn {
