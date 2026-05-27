@@ -11,7 +11,7 @@
     <meta name="author" content="WIN GROUP">
 
     <!-- Styling -->
-    <link rel="stylesheet" href="{{ asset('style.css') }}">
+    <link rel="stylesheet" href="{{ asset('style.css') }}?v={{ time() }}">
     
     <!-- Google Fonts & CDN Icon Kits -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">

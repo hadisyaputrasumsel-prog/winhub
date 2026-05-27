@@ -1348,9 +1348,14 @@ a {
     color: var(--secondary);
 }
 
-.role-buttons {
+.role-switcher-label span {
+    white-space: nowrap;
+}
+
+.role-switcher-buttons {
     display: flex;
     gap: 5px;
+    flex-wrap: nowrap;
 }
 
 .role-switch-btn {
@@ -2412,18 +2417,20 @@ a {
     .portal-sidebar .btn-logout span {
         display: block; /* Restore for mobile drawer */
     }
-    .portal-main {
-        margin-left: 0;
-        padding: 60px 15px 15px 15px;
-        max-width: 100vw;
-        overflow-x: hidden;
-    }
-    /* Bottom CTA Section */
     .bottom-cta-buttons {
         flex-direction: column;
     }
     .bottom-cta-buttons button {
         width: 100%;
+    }
+    .role-switcher-bar {
+        display: none !important;
+    }
+    .portal-main {
+        margin-left: 0;
+        padding: 15px 15px 15px 15px; /* Kurangi padding atas karena role switcher hilang */
+        max-width: 100vw;
+        overflow-x: hidden;
     }
     
     .mobile-menu-btn {
