@@ -474,7 +474,7 @@
     <div id="portal-section" style="display: none;">
         
         <!-- Top Bar Quick Role Switcher for workflow testing -->
-        <div class="role-switcher-bar" id="role-switcher-bar" style="display: none !important;">
+        <div class="role-switcher-bar" id="role-switcher-bar" style="display: none;">
             <div class="role-switcher-label">
                 <i class="fas fa-exchange-alt"></i>
                 <span><strong>Quick Switch Role (Simulator Alur Kerja)</strong></span>

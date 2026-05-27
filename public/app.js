@@ -481,9 +481,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Show Role Switcher only if current user is Super Admin or originally logged in as Super Admin
             if (currentUser.role === 'Super Admin' || localStorage.getItem('wh_is_superadmin') === 'true') {
-                roleSwitcherBar.style.setProperty('display', 'flex', 'important');
+                roleSwitcherBar.style.display = 'flex';
             } else {
-                roleSwitcherBar.style.setProperty('display', 'none', 'important');
+                roleSwitcherBar.style.display = 'none';
             }
             
             document.body.classList.add('dark-mode');
