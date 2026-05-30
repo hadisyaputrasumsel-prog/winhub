@@ -48,7 +48,7 @@
                 <li><a href="#" class="nav-link" id="nav-tentang-kami">Tentang Kami</a></li>
             </ul>
             <div style="display:flex; gap:10px; align-items:center;">
-                <button class="btn-portal-access" id="btn-nav-login"><i class="fas fa-user-circle" style="font-size: 16px;"></i> <span class="hide-mobile">Login</span></button>
+                <a href="{{ route('login') }}" class="btn-portal-access" style="text-decoration: none;"><i class="fas fa-user-circle" style="font-size: 16px;"></i> <span class="hide-mobile">Login</span></a>
                 <button id="mobile-nav-toggle" class="mobile-menu-btn" style="display:none; background:none; border:none; font-size:24px; color:var(--primary); cursor:pointer;"><i class="fas fa-bars"></i></button>
             </div>
         </nav>

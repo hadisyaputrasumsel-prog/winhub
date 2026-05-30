@@ -115,6 +115,9 @@ class WinHubController extends Controller
                     $data = $request->input('data');
                     
                     if ($table === 'permohonan') {
+                        if (empty($data)) {
+                            return response()->json(['success' => false, 'error' => 'Data permohonan kosong. Sinkronisasi ditolak untuk mencegah hilangnya data.']);
+                        }
                         DB::statement('SET FOREIGN_KEY_CHECKS = 0');
                         DB::table('permohonan')->truncate();
                         
