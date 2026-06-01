@@ -1895,40 +1895,37 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function renderTTPerformanceRows(data) {
-        // We have 2 default TT
-        // Tono NIDI (usr-03)
-        // Slamet SLO (usr-04)
+        const usersList = JSON.parse(localStorage.getItem('wh_users')) || [];
+        const tts = usersList.filter(u => u.role === 'TT NIDI' || u.role === 'TT SLO');
         
-        const nidiTasks = data.filter(x => x.ttNidi === 'usr-03');
-        const nidiTotal = nidiTasks.length;
-        const nidiPending = nidiTasks.filter(x => x.status === 'Process NIDI').length;
-        const nidiSelesai = nidiTotal - nidiPending;
-        const nidiRate = nidiTotal > 0 ? Math.round((nidiSelesai / nidiTotal) * 100) : 0;
+        if (tts.length === 0) {
+             return `<tr><td colspan="6" style="text-align:center; color:#94A3B8;">Belum ada data Tenaga Teknik.</td></tr>`;
+        }
 
-        const sloTasks = data.filter(x => x.ttSlo === 'usr-04');
-        const sloTotal = sloTasks.length;
-        const sloPending = sloTasks.filter(x => x.status === 'Process SLO').length;
-        const sloSelesai = sloTotal - sloPending;
-        const sloRate = sloTotal > 0 ? Math.round((sloseleai = sloSelesai / sloTotal) * 100) : 0;
+        let html = '';
+        tts.forEach(tt => {
+             const isNidi = tt.role === 'TT NIDI';
+             const tasks = data.filter(x => isNidi ? (x.ttNidi === tt.id || x.ttNidi === tt.name) : (x.ttSlo === tt.id || x.ttSlo === tt.name));
+             const total = tasks.length;
+             const pending = tasks.filter(x => x.status === (isNidi ? 'Process NIDI' : 'Process SLO')).length;
+             const selesai = total - pending;
+             const rate = total > 0 ? Math.round((selesai / total) * 100) : 0;
+             const badgeClass = isNidi ? 'rgba(59,130,246,0.15)' : 'rgba(236,72,153,0.15)';
+             const badgeColor = isNidi ? '#3B82F6' : '#EC4899';
+             const badgeText = isNidi ? 'Sertifikasi NIDI' : 'Uji Laik SLO';
 
-        return `
-            <tr>
-                <td><strong>Tono NIDI</strong></td>
-                <td><span class="badge" style="background:rgba(59,130,246,0.15); color:#3B82F6;">Sertifikasi NIDI</span></td>
-                <td>${nidiTotal}</td>
-                <td><span style="color:var(--success); font-weight:600;">${nidiSelesai}</span></td>
-                <td><span style="color:var(--warning); font-weight:600;">${nidiPending}</span></td>
-                <td><strong>${nidiRate}%</strong></td>
-            </tr>
-            <tr>
-                <td><strong>Slamet SLO</strong></td>
-                <td><span class="badge" style="background:rgba(236,72,153,0.15); color:#EC4899;">Uji Laik SLO</span></td>
-                <td>${sloTotal}</td>
-                <td><span style="color:var(--success); font-weight:600;">${sloSelesai}</span></td>
-                <td><span style="color:var(--warning); font-weight:600;">${sloPending}</span></td>
-                <td><strong>${sloRate}%</strong></td>
-            </tr>
-        `;
+             html += `
+                <tr>
+                    <td><strong>${tt.name}</strong></td>
+                    <td><span class="badge" style="background:${badgeClass}; color:${badgeColor};">${badgeText}</span></td>
+                    <td>${total}</td>
+                    <td><span style="color:var(--success); font-weight:600;">${selesai}</span></td>
+                    <td><span style="color:var(--warning); font-weight:600;">${pending}</span></td>
+                    <td><strong>${rate}%</strong></td>
+                </tr>
+             `;
+        });
+        return html;
     }
 
     function renderManagerCharts(data) {
