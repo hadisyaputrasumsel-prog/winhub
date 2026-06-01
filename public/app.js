@@ -3807,7 +3807,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
 
-        document.getElementById('btn-add-user').addEventListener('click', () => {
+        const btnAddUser = document.getElementById('btn-add-user');
+        if (btnAddUser) {
+            btnAddUser.addEventListener('click', () => {
             Swal.fire({
                 title: 'Registrasi User Baru',
                 html: `
@@ -4165,7 +4167,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                 });
             });
-        });
+            });
+        }
 
         // Bind Edit User button
         document.querySelectorAll('.btn-edit-user').forEach(btn => {
