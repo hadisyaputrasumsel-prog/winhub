@@ -7,32 +7,32 @@
 <div class="view-content active" id="dashboard-view" style="animation: fadeUp 0.4s ease-out;">
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon"><i class="fas fa-file-alt"></i></div>
-            <div class="stat-details">
+            <div class="stat-card-icon"><i class="fas fa-file-alt"></i></div>
+            <div class="stat-card-details">
                 <h3>Total Permohonan</h3>
                 <h2>{{ number_format($totalPermohonan, 0, ',', '.') }}</h2>
                 <span class="stat-trend trend-up"><i class="fas fa-arrow-up"></i> Total Sistem</span>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;"><i class="fas fa-clock"></i></div>
-            <div class="stat-details">
+            <div class="stat-card-icon" style="background: rgba(245, 158, 11, 0.15); color: #F59E0B;"><i class="fas fa-clock"></i></div>
+            <div class="stat-card-details">
                 <h3>Sedang Proses</h3>
                 <h2>{{ number_format($sedangProses, 0, ',', '.') }}</h2>
                 <span class="stat-trend text-neutral">Menunggu tindakan</span>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #10B981;"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-details">
+            <div class="stat-card-icon" style="background: rgba(16, 185, 129, 0.15); color: #10B981;"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-card-details">
                 <h3>Selesai (SLO/NIDI Terbit)</h3>
                 <h2>{{ number_format($selesai, 0, ',', '.') }}</h2>
                 <span class="stat-trend trend-up"><i class="fas fa-check"></i> Selesai</span>
             </div>
         </div>
         <div class="stat-card">
-            <div class="stat-icon" style="background: rgba(236, 72, 153, 0.15); color: #EC4899;"><i class="fas fa-wallet"></i></div>
-            <div class="stat-details">
+            <div class="stat-card-icon" style="background: rgba(236, 72, 153, 0.15); color: #EC4899;"><i class="fas fa-wallet"></i></div>
+            <div class="stat-card-details">
                 <h3>Pendapatan Total</h3>
                 <h2>Rp {{ number_format($revenue, 0, ',', '.') }}</h2>
                 <span class="stat-trend text-neutral">Berdasarkan data Paid</span>
