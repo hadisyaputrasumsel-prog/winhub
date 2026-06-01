@@ -15,9 +15,17 @@ class DashboardController extends Controller
         // 1. Role-based filtering
         if ($user) {
             if ($user->role === 'TT NIDI') {
-                $query->whereIn('status', ['Proses NIDI', 'NIDI Selesai', 'Completed']);
+                $query->whereIn('status', ['Proses NIDI', 'NIDI Selesai', 'Completed'])
+                      ->where(function($q) use ($user) {
+                          $q->where('ttNidi', $user->id)
+                            ->orWhere('ttNidi', $user->name);
+                      });
             } elseif ($user->role === 'TT SLO') {
-                $query->whereIn('status', ['Proses SLO', 'SLO Selesai', 'Completed']);
+                $query->whereIn('status', ['Proses SLO', 'SLO Selesai', 'Completed'])
+                      ->where(function($q) use ($user) {
+                          $q->where('ttSlo', $user->id)
+                            ->orWhere('ttSlo', $user->name);
+                      });
             } elseif ($user->role === 'Admin Keuangan') {
                 // Example filter for Keuangan (maybe all, or just paid/unpaid focus, here we show all for revenue focus)
             }

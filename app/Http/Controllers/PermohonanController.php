@@ -12,6 +12,21 @@ class PermohonanController extends Controller
     {
         $query = Permohonan::orderBy('tanggalInput', 'desc');
 
+        if (auth()->check()) {
+            $user = auth()->user();
+            if ($user->role === 'TT NIDI') {
+                $query->where(function($q) use ($user) {
+                          $q->where('ttNidi', $user->id)
+                            ->orWhere('ttNidi', $user->name);
+                      });
+            } elseif ($user->role === 'TT SLO') {
+                $query->where(function($q) use ($user) {
+                          $q->where('ttSlo', $user->id)
+                            ->orWhere('ttSlo', $user->name);
+                      });
+            }
+        }
+
         if ($request->has('search')) {
             $search = $request->input('search');
             $query->where('id', 'like', "%{$search}%")

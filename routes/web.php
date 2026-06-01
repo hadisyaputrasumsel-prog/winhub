@@ -26,14 +26,17 @@ Route::middleware('auth')->group(function () {
     // Permohonan
     Route::resource('/permohonan', PermohonanController::class)->except(['show']);
     
-    // Manajemen User
-    Route::resource('/users', UserController::class)->except(['show']);
-    
-    // Master Biaya
-    Route::resource('/master/biaya', BiayaController::class)->except(['show'])->names('master.biaya');
-    
-    // Master Wilayah
-    Route::resource('/master/wilayah', App\Http\Controllers\WilayahController::class)->except(['show'])->names('master.wilayah');
+    // Manajemen User, Master Biaya, Master Wilayah (Restricted to Super Admin & Admin Pelayanan)
+    Route::middleware('role:Super Admin,Admin Pelayanan')->group(function () {
+        // Manajemen User
+        Route::resource('/users', UserController::class)->except(['show']);
+        
+        // Master Biaya
+        Route::resource('/master/biaya', BiayaController::class)->except(['show'])->names('master.biaya');
+        
+        // Master Wilayah
+        Route::resource('/master/wilayah', App\Http\Controllers\WilayahController::class)->except(['show'])->names('master.wilayah');
+    });
 });
 
 // Old API route (kept for backwards compatibility if needed during transition)

@@ -41,9 +41,12 @@
             <ul class="sidebar-menu">
                 <li><a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard Utama</span></a></li>
                 <li><a href="{{ route('permohonan.index') }}" class="sidebar-link {{ request()->routeIs('permohonan.*') ? 'active' : '' }}"><i class="fas fa-file-invoice"></i> <span>Daftar Permohonan</span></a></li>
+                
+                @if(in_array(Auth::user()->role, ['Super Admin', 'Admin Pelayanan']))
                 <li><a href="{{ route('users.index') }}" class="sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="fas fa-users"></i> <span>Manajemen User</span></a></li>
                 <li><a href="{{ route('master.biaya.index') }}" class="sidebar-link {{ request()->routeIs('master.biaya.*') ? 'active' : '' }}"><i class="fas fa-money-bill-wave"></i> <span>Master Biaya</span></a></li>
                 <li><a href="{{ route('master.wilayah.index') }}" class="sidebar-link {{ request()->routeIs('master.wilayah.*') ? 'active' : '' }}"><i class="fas fa-map-marker-alt"></i> <span>Master Wilayah</span></a></li>
+                @endif
             </ul>
 
             <div class="sidebar-footer">
