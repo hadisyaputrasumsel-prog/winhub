@@ -1316,7 +1316,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 8C. TT NIDI DASHBOARD
     function renderTTNidiDashboard(container) {
         const data = JSON.parse(localStorage.getItem('wh_permohonan')) || [];
-        const nidiTasks = data.filter(x => x.ttNidi === 'usr-03');
+        const nidiTasks = data.filter(x => x.ttNidi === currentUser.id || x.ttNidi === currentUser.name);
         
         const total = nidiTasks.length;
         const pending = nidiTasks.filter(x => x.status === 'Process NIDI').length;
@@ -1381,7 +1381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 8D. TT SLO DASHBOARD
     function renderTTSloDashboard(container) {
         const data = JSON.parse(localStorage.getItem('wh_permohonan')) || [];
-        const sloTasks = data.filter(x => x.ttSlo === 'usr-04');
+        const sloTasks = data.filter(x => x.ttSlo === currentUser.id || x.ttSlo === currentUser.name);
         
         const total = sloTasks.length;
         const pending = sloTasks.filter(x => x.status === 'Process SLO').length;
@@ -2578,7 +2578,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 8I. PEKERJAAN TT NIDI VIEW
     function renderTTNidiTugasView(container) {
         const data = JSON.parse(localStorage.getItem('wh_permohonan')) || [];
-        const tasks = data.filter(x => x.ttNidi === 'usr-03' && x.status === 'Process NIDI');
+        const tasks = data.filter(x => (x.ttNidi === currentUser.id || x.ttNidi === currentUser.name) && x.status === 'Process NIDI');
 
         if (tasks.length === 0) {
             container.innerHTML = `
@@ -2725,7 +2725,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 8J. PEKERJAAN TT SLO VIEW
     function renderTTSloTugasView(container) {
         const data = JSON.parse(localStorage.getItem('wh_permohonan')) || [];
-        const tasks = data.filter(x => x.ttSlo === 'usr-04' && x.status === 'Process SLO');
+        const tasks = data.filter(x => (x.ttSlo === currentUser.id || x.ttSlo === currentUser.name) && x.status === 'Process SLO');
 
         if (tasks.length === 0) {
             container.innerHTML = `
