@@ -37,7 +37,7 @@
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Daya Listrik</th>
+                        <th style="width: 250px; min-width: 200px;">Daya Listrik</th>
                         <th>Golongan / Keterangan</th>
                         <th style="text-align: right;">NIDI</th>
                         <th style="text-align: right;">SLO</th>

@@ -5,7 +5,7 @@
 
 @section('content')
 <div class="view-content active" style="animation: fadeUp 0.4s ease-out;">
-    <div class="portal-card" style="max-width: 600px; margin: 0 auto;">
+    <div class="portal-card" style="max-width: 800px; margin: 0 auto;">
         <form action="{{ route('master.biaya.update', $biaya->daya) }}" method="POST">
             @csrf
             @method('PUT')
