@@ -1033,12 +1033,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             </li>`;
         }
 
-        // Add Master Data and Logs for Manager / Admin Pelayanan / Admin Proses
-        if (currentUser.role === 'Manager' || currentUser.role === 'Admin Pelayanan' || currentUser.role === 'Admin Proses') {
+        // Master Data
+        if (currentUser.role === 'Manager' || currentUser.role === 'Admin Pelayanan' || currentUser.role === 'Admin Proses' || currentUser.role === 'Super Admin') {
             menuHtml += `
             <li class="menu-item ${activeTab === 'master-data' ? 'active' : ''}" data-tab="master-data">
                 <a href="#"><i class="fas fa-database"></i> <span>Master Data</span></a>
-            </li>
+            </li>`;
+        }
+        
+        // Audit Trail
+        if (currentUser.role === 'Manager' || currentUser.role === 'Super Admin') {
+            menuHtml += `
             <li class="menu-item ${activeTab === 'audit-trail' ? 'active' : ''}" data-tab="audit-trail">
                 <a href="#"><i class="fas fa-history"></i> <span>Audit Trail</span></a>
             </li>`;
