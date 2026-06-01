@@ -1519,6 +1519,8 @@ a {
 /* Main Content Area */
 .portal-main {
     margin-left: 260px;
+    width: calc(100% - 260px);
+    max-width: calc(100% - 260px);
     padding: 70px 30px 30px 30px;
     flex-grow: 1;
     min-height: 100vh;
@@ -2323,6 +2325,8 @@ a {
     }
     .portal-main {
         margin-left: 70px;
+        width: calc(100% - 70px);
+        max-width: calc(100% - 70px);
     }
     .nav-links {
         display: none;
