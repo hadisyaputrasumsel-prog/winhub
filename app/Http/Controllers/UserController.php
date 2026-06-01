@@ -45,6 +45,10 @@ class UserController extends Controller
 
         $validated['password'] = bcrypt($validated['password']);
 
+        if (in_array($validated['role'], ['Super Admin', 'Manager']) && auth()->user()->role !== 'Super Admin') {
+            return back()->withErrors(['role' => 'Anda tidak memiliki hak untuk membuat akun dengan level eksekutif/Super Admin.'])->withInput();
+        }
+
         User::create($validated);
 
         return redirect()->route('users.index')->with('success', 'User berhasil ditambahkan.');
@@ -52,6 +56,10 @@ class UserController extends Controller
 
     public function edit(User $user)
     {
+        if (in_array($user->role, ['Super Admin', 'Manager']) && auth()->user()->role !== 'Super Admin') {
+            return redirect()->route('users.index')->with('error', 'Anda tidak memiliki hak untuk mengubah akun level eksekutif/Super Admin.');
+        }
+
         return view('users.edit', compact('user'));
     }
 
@@ -71,6 +79,14 @@ class UserController extends Controller
             unset($validated['password']);
         }
 
+        if (in_array($user->role, ['Super Admin', 'Manager']) && auth()->user()->role !== 'Super Admin') {
+            return redirect()->route('users.index')->with('error', 'Anda tidak memiliki hak untuk mengubah akun ini.');
+        }
+
+        if (in_array($validated['role'], ['Super Admin', 'Manager']) && auth()->user()->role !== 'Super Admin') {
+            return back()->withErrors(['role' => 'Anda tidak memiliki hak untuk menetapkan role level eksekutif/Super Admin.'])->withInput();
+        }
+
         $user->update($validated);
 
         return redirect()->route('users.index')->with('success', 'User berhasil diubah.');
@@ -80,6 +96,10 @@ class UserController extends Controller
     {
         if ($user->id === 'usr-00' || $user->id === auth()->id()) {
             return redirect()->route('users.index')->with('error', 'User ini tidak dapat dihapus.');
+        }
+
+        if (in_array($user->role, ['Super Admin', 'Manager']) && auth()->user()->role !== 'Super Admin') {
+            return redirect()->route('users.index')->with('error', 'Anda tidak memiliki hak untuk menghapus akun level eksekutif/Super Admin.');
         }
 
         $user->delete();

@@ -45,13 +45,15 @@
                 <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #1E293B;">Role Akses <span style="color: #EF4444;">*</span></label>
                 <select name="role" required style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #CBD5E1; background: white;">
                     <option value="">Pilih Role</option>
-                    <option value="Super Admin" {{ old('role') == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
+                    @if(auth()->user()->role === 'Super Admin')
+                        <option value="Super Admin" {{ old('role') == 'Super Admin' ? 'selected' : '' }}>Super Admin</option>
+                        <option value="Manager" {{ old('role') == 'Manager' ? 'selected' : '' }}>Manager</option>
+                    @endif
                     <option value="Admin Pelayanan" {{ old('role') == 'Admin Pelayanan' ? 'selected' : '' }}>Admin Pelayanan</option>
                     <option value="Admin Proses" {{ old('role') == 'Admin Proses' ? 'selected' : '' }}>Admin Proses</option>
                     <option value="TT NIDI" {{ old('role') == 'TT NIDI' ? 'selected' : '' }}>TT NIDI</option>
                     <option value="TT SLO" {{ old('role') == 'TT SLO' ? 'selected' : '' }}>TT SLO</option>
                     <option value="Admin Keuangan" {{ old('role') == 'Admin Keuangan' ? 'selected' : '' }}>Admin Keuangan</option>
-                    <option value="Manager" {{ old('role') == 'Manager' ? 'selected' : '' }}>Manager</option>
                 </select>
                 @error('role')
                     <span style="color: #EF4444; font-size: 12px;">{{ $message }}</span>
