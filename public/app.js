@@ -3231,7 +3231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         container.innerHTML = `
             <div class="charts-grid">
                  <!-- Master Daya -->
-                <div class="chart-card">
+                <div class="chart-card" style="grid-column: span 2;">
                     <div class="chart-card-header">
                         <h4>Master Batasan Daya Listrik</h4>
                         <button class="btn-action primary" id="btn-add-daya"><i class="fas fa-plus"></i> Daya Baru</button>
