@@ -2150,10 +2150,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="form-field form-group-full">
                             <label>Status Member</label>
                             <select id="inp-status-member" class="form-input">
-                                <option value="Pelanggan">Pelanggan</option>
-                                <option value="Area">Area</option>
-                                <option value="Mitra">Mitra</option>
-                                <option value="Langganan">Langganan</option>
+                                <option value="Area">AREA</option>
+                                <option value="Mitra">MITRA</option>
+                                <option value="Langganan">LANGGANAN</option>
+                                <option value="Banyak dan Rutin">BANYAK & RUTIN</option>
+                                <option value="Pelanggan">PELANGGAN</option>
                             </select>
                         </div>
                         <div class="form-field" id="container-nama-pemohon" style="display: none;">
@@ -2999,10 +3000,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </select>
                         <select id="fin-filter-member" class="table-filter-select">
                             <option value="ALL">Semua Status Member</option>
-                            <option value="Pelanggan">Pelanggan</option>
-                            <option value="Area">Area</option>
-                            <option value="Mitra">Mitra</option>
-                            <option value="Langganan">Langganan</option>
+                            <option value="Area">AREA</option>
+                            <option value="Mitra">MITRA</option>
+                            <option value="Langganan">LANGGANAN</option>
+                            <option value="Banyak dan Rutin">BANYAK & RUTIN</option>
+                            <option value="Pelanggan">PELANGGAN</option>
                         </select>
                         <button class="btn-action primary" id="btn-export-csv"><i class="fas fa-file-excel"></i> Export CSV (Excel)</button>
                     </div>
@@ -4263,11 +4265,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         <div style="text-align: left; margin-bottom: 4px;"><label style="font-size:12px; color:#94a3b8; font-weight:600;">Status</label></div>
                         <select id="add-member-status" class="swal2-input" style="width: 78%; height: 50px; margin-top:0; margin-bottom:10px;">
-                            <option value="Pelanggan">Pelanggan</option>
-                            <option value="Area">Area</option>
-                            <option value="Mitra">Mitra</option>
-                            <option value="Langganan">Langganan</option>
-                            <option value="Banyak dan Rutin">Banyak & Rutin</option>
+                            <option value="Area">AREA</option>
+                            <option value="Mitra">MITRA</option>
+                            <option value="Langganan">LANGGANAN</option>
+                            <option value="Banyak dan Rutin">BANYAK & RUTIN</option>
+                            <option value="Pelanggan">PELANGGAN</option>
                         </select>
                     `,
                     focusConfirm: false,
@@ -4314,11 +4316,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         <div style="text-align: left; margin-bottom: 4px;"><label style="font-size:12px; color:#94a3b8; font-weight:600;">Status</label></div>
                         <select id="edit-member-status" class="swal2-input" style="width: 78%; height: 50px; margin-top:0; margin-bottom:10px;">
-                            <option value="Pelanggan" ${(item.status || 'Pelanggan') === 'Pelanggan' ? 'selected' : ''}>Pelanggan</option>
-                            <option value="Area" ${(item.status || 'Pelanggan') === 'Area' ? 'selected' : ''}>Area</option>
-                            <option value="Mitra" ${(item.status || 'Pelanggan') === 'Mitra' ? 'selected' : ''}>Mitra</option>
-                            <option value="Langganan" ${(item.status || 'Pelanggan') === 'Langganan' ? 'selected' : ''}>Langganan</option>
-                            <option value="Banyak dan Rutin" ${(item.status || 'Pelanggan') === 'Banyak dan Rutin' ? 'selected' : ''}>Banyak & Rutin</option>
+                            <option value="Area" ${(item.status || 'Pelanggan') === 'Area' ? 'selected' : ''}>AREA</option>
+                            <option value="Mitra" ${(item.status || 'Pelanggan') === 'Mitra' ? 'selected' : ''}>MITRA</option>
+                            <option value="Langganan" ${(item.status || 'Pelanggan') === 'Langganan' ? 'selected' : ''}>LANGGANAN</option>
+                            <option value="Banyak dan Rutin" ${(item.status || 'Pelanggan') === 'Banyak dan Rutin' ? 'selected' : ''}>BANYAK & RUTIN</option>
+                            <option value="Pelanggan" ${(item.status || 'Pelanggan') === 'Pelanggan' ? 'selected' : ''}>PELANGGAN</option>
                         </select>
                     `,
                     focusConfirm: false,

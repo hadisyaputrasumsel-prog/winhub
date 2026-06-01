@@ -40,8 +40,8 @@
         </div>
     </div>
 
-    <div class="dashboard-grid">
-        <div class="chart-container">
+    <div class="charts-grid">
+        <div class="chart-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
                 <h3 style="margin:0; font-size: 16px; color: white;">Statistik Permohonan Terkini</h3>
                 <select class="filter-select" id="chart-filter">
@@ -52,7 +52,7 @@
             <canvas id="mainChart" style="width: 100%; height: 250px;"></canvas>
         </div>
 
-        <div class="recent-activity-container">
+        <div class="chart-card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px; padding: 0 20px;">
                 <h3 style="margin:0; font-size: 16px; color: white;">Aktivitas Terkini</h3>
                 <button class="btn-action" style="font-size: 12px; padding: 6px 12px;">Lihat Semua</button>
