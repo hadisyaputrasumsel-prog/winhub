@@ -1742,6 +1742,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    window.showUnpaidDetails = function(name) {
+        const data = JSON.parse(localStorage.getItem('wh_permohonan')) || [];
+        const unpaidItems = data.filter(item => {
+            const itemName = item.namaPemohon || item.namaPelanggan || 'Tanpa Nama';
+            return itemName === name && item.pembayaranStatus !== 'Paid';
+        });
+
+        if (unpaidItems.length === 0) {
+            Swal.fire('Info', 'Tidak ada tagihan yang belum lunas.', 'info');
+            return;
+        }
+
+        let totalUnpaid = 0;
+        let rows = unpaidItems.map((item, idx) => {
+            totalUnpaid += (item.biaya || 0);
+            return `
+            <tr>
+                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; color: #333;">${idx + 1}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; color: #333;"><strong>${item.id}</strong></td>
+                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; color: #333;">${item.jenisPermohonan || '-'}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #e2e8f0; color: #333; text-align: right;">Rp ${formatCurrency(item.biaya || 0)}</td>
+            </tr>
+            `;
+        }).join('');
+
+        const tableHtml = `
+            <div style="text-align: left; overflow-x: auto; margin-top: 10px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                    <thead>
+                        <tr style="background: #f8fafc;">
+                            <th style="padding: 10px; text-align: left; color: #64748b;">No</th>
+                            <th style="padding: 10px; text-align: left; color: #64748b;">ID Transaksi</th>
+                            <th style="padding: 10px; text-align: left; color: #64748b;">Layanan</th>
+                            <th style="padding: 10px; text-align: right; color: #64748b;">Tagihan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rows}
+                    </tbody>
+                    <tfoot>
+                        <tr style="background: #f1f5f9;">
+                            <td colspan="3" style="padding: 10px; text-align: right; font-weight: bold; color: #0f172a;">Total Piutang:</td>
+                            <td style="padding: 10px; text-align: right; font-weight: bold; color: #ef4444;">Rp ${formatCurrency(totalUnpaid)}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        `;
+
+        Swal.fire({
+            title: `Rincian Piutang`,
+            html: `<p style="margin-bottom:15px; color:#475569; font-size:14px;">Tagihan belum dibayar untuk pelanggan <strong>${name}</strong>:</p>` + tableHtml,
+            width: 600,
+            confirmButtonColor: '#004AAD',
+            confirmButtonText: 'Tutup'
+        });
+    };
+
     function renderKeuanganRecentRows(data) {
         if (data.length === 0) {
             return `<tr><td colspan="4" style="text-align:center;">Belum ada riwayat transaksi.</td></tr>`;
@@ -1777,7 +1835,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <td>${idx + 1}</td>
                 <td><strong>${item.name}</strong> <span class="badge" style="font-size:10px; margin-left:8px; background:rgba(255,255,255,0.05); color:#cbd5e1;">${item.statusMember}</span></td>
                 <td><strong style="color:var(--success);">Rp ${formatCurrency(item.paid)}</strong></td>
-                <td><strong style="color:var(--danger);">Rp ${formatCurrency(item.unpaid)}</strong></td>
+                <td>
+                    ${item.unpaid > 0 
+                        ? `<strong style="color:var(--danger); cursor:pointer; text-decoration:underline; display:inline-block; padding:4px 8px; border-radius:4px; background:rgba(239, 68, 68, 0.1);" onclick="window.showUnpaidDetails('${item.name.replace(/'/g, "\\'")}')" title="Klik untuk melihat rincian piutang">Rp ${formatCurrency(item.unpaid)} <i class="fas fa-search" style="font-size:11px; margin-left:4px;"></i></strong>`
+                        : `<strong style="color:#64748b;">Rp 0</strong>`
+                    }
+                </td>
             </tr>
         `).join('');
     }
@@ -2227,9 +2290,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                         <!-- Biaya Tambahan (Conditional) -->
                         <div class="form-field form-group-full" id="container-biaya-tambahan" style="display: none; background: rgba(0, 74, 173, 0.05); border: 1px solid rgba(0, 74, 173, 0.2); padding: 15px; border-radius: 8px;">
-                            <label style="color: var(--secondary);">Biaya Tambahan (Manual Input)</label>
+                            <label id="label-biaya-manual" style="color: var(--secondary);">Biaya Tambahan (Manual Input)</label>
                             <input type="number" id="inp-biaya-tambahan" class="form-input" placeholder="Masukkan nominal jika ada (opsional)" value="0">
-                            <span style="font-size: 11px; color: #94a3b8; display: block; margin-top: 4px;"><i class="fas fa-info-circle"></i> Biaya ini akan ditambahkan ke total estimasi.</span>
+                            <span id="hint-biaya-manual" style="font-size: 11px; color: #94a3b8; display: block; margin-top: 4px;"><i class="fas fa-info-circle"></i> Biaya ini akan ditambahkan ke total estimasi.</span>
                         </div>
 
                         <!-- Dynamic cost displays in real time -->
@@ -2383,6 +2446,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 total = bItem.mitra || 0;
             } else if (statusStr === 'Langganan') {
                 total = bItem.langganan || 0;
+            } else if (statusStr === 'Banyak dan Rutin') {
+                total = 0; // Manual input
             } else {
                 // Status is 'Pelanggan'
                 if (typeStr === 'NIDI') {
@@ -2396,8 +2461,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Handling Biaya Tambahan Visibility & Calculation
             let biayaTambahan = 0;
-            if (statusStr === 'Pelanggan' && typeStr === 'FULL') {
+            const labelBiayaManual = document.getElementById('label-biaya-manual');
+            const hintBiayaManual = document.getElementById('hint-biaya-manual');
+
+            if (statusStr === 'Banyak dan Rutin') {
                 if (containerBiayaTambahan) containerBiayaTambahan.style.display = 'block';
+                if (labelBiayaManual) labelBiayaManual.innerText = 'Total Biaya Transaksi (Input Manual)';
+                if (hintBiayaManual) hintBiayaManual.innerHTML = '<i class="fas fa-info-circle"></i> Masukkan total biaya secara manual sesuai kesepakatan.';
+                if (inpBiayaTambahan) biayaTambahan = parseInt(inpBiayaTambahan.value) || 0;
+            } else if (statusStr === 'Pelanggan' && typeStr === 'FULL') {
+                if (containerBiayaTambahan) containerBiayaTambahan.style.display = 'block';
+                if (labelBiayaManual) labelBiayaManual.innerText = 'Biaya Tambahan (Manual Input)';
+                if (hintBiayaManual) hintBiayaManual.innerHTML = '<i class="fas fa-info-circle"></i> Biaya ini akan ditambahkan ke total estimasi.';
                 if (inpBiayaTambahan) biayaTambahan = parseInt(inpBiayaTambahan.value) || 0;
             } else {
                 if (containerBiayaTambahan) containerBiayaTambahan.style.display = 'none';
