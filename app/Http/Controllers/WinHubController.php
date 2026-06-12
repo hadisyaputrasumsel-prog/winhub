@@ -283,6 +283,39 @@ class WinHubController extends Controller
                     return response()->json(['success' => false, 'error' => $e->getMessage()]);
                 }
             }
+            elseif ($action === 'insert_permohonan') {
+                try {
+                    $p = $request->input('data');
+                    DB::table('permohonan')->insert([
+                        'id' => $p['id'],
+                        'statusMember' => $p['statusMember'] ?? null,
+                        'namaPemohon' => $p['namaPemohon'],
+                        'hp' => $p['hp'] ?? null,
+                        'nik' => $p['nik'],
+                        'namaPelanggan' => $p['namaPelanggan'],
+                        'daya' => $p['daya'],
+                        'alamat' => $p['alamat'],
+                        'kecamatan' => $p['kecamatan'],
+                        'biaya' => $p['biaya'],
+                        'metodePembayaran' => $p['metodePembayaran'],
+                        'jenisPermohonan' => $p['jenisPermohonan'],
+                        'status' => $p['status'],
+                        'ttNidi' => $p['ttNidi'] ?? null,
+                        'ttSlo' => $p['ttSlo'] ?? null,
+                        'catatanNidi' => $p['catatanNidi'] ?? '',
+                        'catatanSlo' => $p['catatanSlo'] ?? '',
+                        'pembayaranStatus' => $p['pembayaranStatus'],
+                        'shared' => !empty($p['shared']) ? 1 : 0,
+                        'tanggalInput' => date('Y-m-d H:i:s', strtotime($p['tanggalInput'])),
+                        'nidiFile' => $p['nidiFile'] ?? null,
+                        'sloFile' => $p['sloFile'] ?? null,
+                        'buktiBayar' => $p['buktiBayar'] ?? null
+                    ]);
+                    return response()->json(['success' => true]);
+                } catch (\Exception $e) {
+                    return response()->json(['success' => false, 'error' => $e->getMessage()]);
+                }
+            }
         }
 
         return response()->json(['success' => false, 'error' => 'Invalid action or method.']);

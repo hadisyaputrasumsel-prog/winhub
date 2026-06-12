@@ -2561,32 +2561,62 @@ document.addEventListener('DOMContentLoaded', async () => {
                 buktiBayar: null
             };
 
-            const dataStore = JSON.parse(localStorage.getItem('wh_permohonan')) || [];
-            dataStore.unshift(newPermohonan);
-            localStorage.setItem('wh_permohonan', JSON.stringify(dataStore));
-
-            // Log activity
-            logActivity(currentUser.name, `Membuat permohonan baru ${newId} (${pelanggan}) - Status: ${targetStatus}`);
-
-            // If it goes directly to Admin Proses, send fake WhatsApp and notify
-            if (targetStatus === 'Waiting Process') {
-                triggerWhatsAppNotification(
-                    `*WIN GROUP NOTIFICATION*\n\nAda Permohonan Baru masuk!\n\n*ID:* ${newId}\n*Pelanggan:* ${pelanggan}\n*Layanan:* ${jenis}\n*Daya:* ${daya}\n\nMohon Admin Proses segera memverifikasi data ini. Terima kasih.`,
-                    'Admin Proses',
-                    'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=100&auto=format&fit=crop&q=60'
-                );
-            }
-
             Swal.fire({
-                title: targetStatus === 'Draft' ? 'Draft Disimpan' : 'Permohonan Dikirim!',
-                text: targetStatus === 'Draft' 
-                    ? 'Draft permohonan berhasil disimpan ke dalam sistem Anda.' 
-                    : `Permohonan ${newId} berhasil dikirim ke Admin Proses.`,
-                icon: 'success'
-            }).then(() => {
-                activeTab = 'dashboard';
-                renderSidebar();
-                renderPortalView();
+                title: 'Menyimpan...',
+                text: 'Menghubungkan ke database...',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch('/api/winhub?action=insert_permohonan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : ''
+                },
+                body: JSON.stringify({ data: newPermohonan })
+            }).then(response => response.json())
+            .then(res => {
+                if (res.success) {
+                    // Update lokal (mematikan flag isSyncingDown sementara agar tidak trigger sync_table keseluruhan)
+                    window.isSyncingDown = true;
+                    const dataStore = JSON.parse(localStorage.getItem('wh_permohonan')) || [];
+                    dataStore.unshift(newPermohonan);
+                    localStorage.setItem('wh_permohonan', JSON.stringify(dataStore));
+                    window.isSyncingDown = false;
+
+                    // Log activity
+                    logActivity(currentUser.name, `Membuat permohonan baru ${newId} (${pelanggan}) - Status: ${targetStatus}`);
+
+                    // Notifikasi WhatsApp jika dikirim ke Admin Proses
+                    if (targetStatus === 'Waiting Process') {
+                        triggerWhatsAppNotification(
+                            `*WIN GROUP NOTIFICATION*\n\nAda Permohonan Baru masuk!\n\n*ID:* ${newId}\n*Pelanggan:* ${pelanggan}\n*Layanan:* ${jenis}\n*Daya:* ${daya}\n\nMohon Admin Proses segera memverifikasi data ini. Terima kasih.`,
+                            'Admin Proses',
+                            'https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=100&auto=format&fit=crop&q=60'
+                        );
+                    }
+
+                    Swal.fire({
+                        title: targetStatus === 'Draft' ? 'Draft Disimpan' : 'Permohonan Dikirim!',
+                        text: targetStatus === 'Draft' 
+                            ? 'Draft permohonan berhasil disimpan ke dalam sistem Anda.' 
+                            : `Permohonan ${newId} berhasil dikirim ke Admin Proses.`,
+                        icon: 'success'
+                    }).then(() => {
+                        activeTab = 'dashboard';
+                        renderSidebar();
+                        renderPortalView();
+                    });
+                } else {
+                    Swal.fire('Gagal Menyimpan', res.error || 'Terjadi kesalahan saat menghubungi database.', 'error');
+                }
+            })
+            .catch(err => {
+                console.error('Error insert_permohonan:', err);
+                Swal.fire('Gagal Menyimpan', 'Gagal menghubungi server database.', 'error');
             });
         }
     }
